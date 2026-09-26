@@ -1,0 +1,174 @@
+units:
+  kx: 18
+  ky: 17
+  cx: 18
+  cy: 17
+
+  # Splay parameters (degrees) - the absolute angle you want each column
+  # rotated to, relative to the zone's own rotation (0 here).
+  outer_rotation: 5
+  pinky_rotation: 5
+  ring_rotation: 3
+  middle_rotation: 0
+  index_rotation: -2
+  inner_rotation: -3
+
+  # Thumb cluster splay parameters (degrees) - absolute angle for each
+  # thumb column, relative to the thumbfan zone's own rotation
+  # (anchor.rotate: -10 below).
+  t1_rotation: 0
+  t2_rotation: -2
+  t3_rotation: -4
+points:
+  key:
+    width: kx    # match the actual keycap footprint to the column pitch (cx)
+    height: ky   # match the actual keycap footprint to the row pitch (ky/cy)
+
+  zones:  
+    matrix: 
+      anchor: 
+        rotate: 0 
+      key:
+        
+        spread: cx    # Forces 18mm column spacing (X-axis)
+        padding: cy   # Forces 17mm row spacing (Y-axis)        
+      columns:
+        k_0:
+          key:
+            splay: outer_rotation
+            column_net: K_0
+      
+        k_1:
+          key:
+            splay: pinky_rotation - outer_rotation
+            stagger: 3.5
+            column_net: K_1
+        k_2:
+          key:
+            splay: ring_rotation - pinky_rotation
+            stagger: 3.5
+            column_net: K_2
+            spread: 1.02cx
+        k_3:
+          key:
+            splay: middle_rotation - ring_rotation
+            stagger: 3
+            column_net: K_3
+            spread: 1.03cx
+        k_4:
+          key:
+            splay: index_rotation - middle_rotation
+            stagger: -3.5
+            column_net: K_4
+            spread: 1.02cx
+        k_5:
+          key:
+            splay: inner_rotation - index_rotation
+            stagger: 5
+            column_net: K_5
+          rows.r_0.skip: true
+          rows.r_3.skip: true
+      rows:
+        r_3:
+          padding: ky
+          row_net: R_3
+        r_2:
+          padding: ky
+          row_net: R_2
+        r_1:
+          padding: ky
+          row_net: R_1
+        r_0:
+          padding: ky
+          row_net: R_0
+
+    thumbfan:
+      anchor:
+        ref: matrix_k_4_r_3
+        shift: [   16, -20]
+        rotate: -15
+      columns:
+        t1:
+          key:
+            splay: t1_rotation
+            column_net: t_1
+
+        t2:
+          key:
+            splay: t2_rotation - t1_rotation
+            column_net: t_2
+            stagger: 0
+        t3:
+          key:
+            splay: t3_rotation - t2_rotation
+            column_net: t_3
+            stagger: 0
+      rows:
+        td:
+          row_net: t_d
+        tu:
+          key.height: 2cy 
+          row_net: t_u
+
+
+
+outlines:
+  raw:
+    - what: rectangle
+      where: true
+      size: [23, 22]
+      corner: 1
+  board:
+    - what: outline
+      name: raw
+      fillet: 2
+
+pcbs:
+  main_pcb:
+    template: kicad8
+    outlines:
+      main:
+        outline: board
+    footprints:
+      # Kailh Choc v1 Hotswap Switches (Reversible)
+      choc_switches:
+        what: ceoloide/switch_choc_v1_v2
+        where: true
+        adjust:
+          rotate: 180
+        params:
+          from: "{{column_net}}"
+          to: "{{colrow}}"
+          hotswap: true
+          solder: false
+          reversible: true
+          choc_v2_support: false
+
+      # Matrix Anti-Ghosting Diodes (Reversible SOD-123 / THT)
+      diodes:
+        what: ceoloide/diode_tht_sod123
+        where: true
+        adjust:
+          shift: [7.2,5]
+          rotate: 270
+        params:
+          from: "{{colrow}}"
+          to: "{{row_net}}"
+          reversible: true
+
+      # Per-key SK6812 MINI-E RGB LEDs (Reversible)
+      perkey_leds:
+        what: ceoloide/led_sk6812mini-e
+        where: true
+        adjust:
+          shift: [0,4.7]   
+             
+        params:
+       
+          side: F
+          reversible: true
+          P1: "VCC"
+          P2: "{{colrow}}_DOUT"
+          P3: "GND"
+          P4: "{{colrow}}_DIN"
+
