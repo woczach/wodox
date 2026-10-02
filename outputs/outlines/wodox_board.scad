@@ -106,10 +106,11 @@ module rp2040_usb_2d() {        // USB rect 7.1 x 5.08
         translate([0,-10.91]) square([7.1, 30.08], center=true);
 }
 
-module pj320e_2d() {            // 3.5mm jack bounding rectangle (F.SilkS extent)
+module pj320e_2d() {            // 3.5mm jack slot: same start, lengthened outward
+    // starts at the jack body (local y=2.1) and extends past the outline wall
     translate([PJ320E_POS[0], PJ320E_POS[1]])
       rotate([0,0,PJ320E_ROT]) mirror([0,1,0])
-        translate([2.75, -5.0]) square([7.3, 14.2], center=true);
+        translate([2.75, -8.45]) square([7.3, 21.1], center=true);  // y: 2.1 .. -19
 }
 
 // RP2040 + USB + jack punched through the full stack (bottom plate -> top plate)
