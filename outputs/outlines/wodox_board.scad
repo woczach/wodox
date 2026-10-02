@@ -2,9 +2,13 @@
 // Units: millimetres. Origin = board lower-left corner. Board: 163.551 x 128.759 mm.
 // Use the embedded polygon below, or uncomment the DXF imports at the bottom.
 
-BOARD_THICKNESS = 1.6;      // FR4 thickness of the real board
-WANT_CUTOUTS    = true;     // 28 Choc v1 switch cutouts through the board
-SWITCH_CUTOUT   = 14.0;     // Choc v1 plate cutout size (mm), square
+BOARD_THICKNESS = 3.0;      // solid height (mm) - needs to exceed LIP_Z1
+WANT_CUTOUTS    = true;     // 28 stepped Choc v1 switch cutouts
+// Choc v1 stepped cutout profile (all squares, centred on each switch):
+CHOC_OUTER      = 14.7;     // size below and above the lip
+CHOC_LIP        = 14.0;     // retention lip size
+LIP_Z0          = 1.0;      // lip bottom height
+LIP_Z1          = 2.1;      // lip top height
 $fn = 48;
 
 // RP2040-Matrix module (from KiCad footprint Cmts.User layer)
@@ -48,19 +52,31 @@ switches = [
   [72.5874, 100.8593, 180.0],
 ];
 
-module board_2d(with_cutouts=WANT_CUTOUTS) {
-    difference() {
-        polygon(points=outer);
-        if (with_cutouts)
-            for (s=switches)
-                translate([s[0], s[1]])
-                    rotate([0, 0, s[2]])
-                        square([SWITCH_CUTOUT, SWITCH_CUTOUT], center=true);
-    }
+module board_2d() {
+    polygon(points=outer);
+}
+
+// Stepped switch holes: 14.7 from z0..LIP_Z0, 14.0 from LIP_Z0..LIP_Z1,
+// then 14.7 again from LIP_Z1 up through the top.
+module switch_cutouts_3d(t=BOARD_THICKNESS) {
+    for (s=switches)
+        translate([s[0], s[1], 0]) rotate([0, 0, s[2]]) {
+            linear_extrude(height=LIP_Z0)
+                square([CHOC_OUTER, CHOC_OUTER], center=true);
+            translate([0, 0, LIP_Z0])
+                linear_extrude(height=LIP_Z1-LIP_Z0)
+                    square([CHOC_LIP, CHOC_LIP], center=true);
+            translate([0, 0, LIP_Z1])
+                linear_extrude(height=t-LIP_Z1)
+                    square([CHOC_OUTER, CHOC_OUTER], center=true);
+        }
 }
 
 module board_3d(with_cutouts=WANT_CUTOUTS, t=BOARD_THICKNESS) {
-    linear_extrude(height=t) board_2d(with_cutouts);
+    difference() {
+        linear_extrude(height=t) board_2d();
+        if (with_cutouts) switch_cutouts_3d(t=t);
+    }
 }
 
 module rp2040_body() {          // rounded rect 18 x 23.5, r=1
