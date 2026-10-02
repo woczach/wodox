@@ -103,16 +103,13 @@ module rp2040_body_2d() {       // rounded rect 18 x 23.5, r=1
 module rp2040_usb_2d() {        // USB rect 7.1 x 5.08
     translate([RP2040_POS[0], RP2040_POS[1]])
       rotate([0,0,RP2040_ROT]) mirror([0,1,0])
-        translate([0,-10.91]) square([7.1, 5.08], center=true);
+        translate([0,-10.91]) square([7.1, 30.08], center=true);
 }
 
-module pj320e_2d() {            // 3.5mm jack body + barrel silhouette (F.SilkS)
+module pj320e_2d() {            // 3.5mm jack bounding rectangle (F.SilkS extent)
     translate([PJ320E_POS[0], PJ320E_POS[1]])
       rotate([0,0,PJ320E_ROT]) mirror([0,1,0])
-        polygon(points=[
-            [-0.9,  2.1], [ 6.4,  2.1], [ 6.4, -9.3], [ 5.2, -9.3],
-            [ 5.2,-12.1], [-0.6,-12.1], [-0.6, -9.3], [-0.9, -9.3]
-        ]);
+        translate([2.75, -5.0]) square([7.3, 14.2], center=true);
 }
 
 // RP2040 + USB + jack punched through the full stack (bottom plate -> top plate)
