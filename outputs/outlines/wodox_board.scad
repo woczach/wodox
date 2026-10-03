@@ -96,6 +96,9 @@ module board_2d() {
 
 // Stepped switch holes: 14.7 from z0..LIP_Z0, 14.0 from LIP_Z0..LIP_Z1,
 // then 14.7 again from LIP_Z1 up through the top.
+// Each square is centered (center=true) on the switch centre s=[x,y,rot] from
+// the PCB (footprint origin = the Choc centre peg at local (0,0)), then rotated
+// to the switch's ergo angle.
 module switch_cutouts_3d(t=BOARD_THICKNESS) {
     for (s=switches)
         translate([s[0], s[1], 0]) rotate([0, 0, s[2]]) {
@@ -180,30 +183,50 @@ module bottom_insert_holes() {
 
 // Local barrels around each screw so the thin outline has enough material
 // for the insert (bottom) and clearance (top) holes.
-module screw_bosses() {
+module screw_bosses_top() {
     d = M3_INSERT_D + 2*SCREW_BOSS_WALL;
-    for (s=screws) {
-        translate([s[0], s[1], -PLATE_GAP - PLATE_THICKNESS])
-            cylinder(d=d, h=BOT_OUTLINE_H, $fn=48);   // bottom insert barrel
+    for (s=screws)
         translate([s[0], s[1], 0])
-            cylinder(d=d, h=TOP_OUTLINE_H, $fn=48);   // top clearance barrel
-    }
+            cylinder(d=d, h=TOP_OUTLINE_H, $fn=48);
+}
+module screw_bosses_bottom() {
+    d = M3_INSERT_D + 2*SCREW_BOSS_WALL;
+    for (s=screws)
+        translate([s[0], s[1], -PLATE_GAP - PLATE_THICKNESS])
+            cylinder(d=d, h=BOT_OUTLINE_H, $fn=48);
 }
 
-// one complete half: top plate + bottom plate with outlines, switch and
-// component (RP2040/USB/jack) cutouts, and screw joints
-module board_half() {
+// TOP printable part: switch plate + top outline + screw clearance holes
+module top_part() {
     difference() {
         union() {
             board_3d();
-            bottom_plate();
-            plate_outline(TOP_OUTLINE_H, 0);                              // top: 3mm
-            plate_outline(BOT_OUTLINE_H, -PLATE_GAP - PLATE_THICKNESS);   // bottom: 7mm
-            screw_bosses();
+            plate_outline(TOP_OUTLINE_H, 0);
+            screw_bosses_top();
         }
         component_cutouts();
         top_screw_holes();
+    }
+}
+
+// BOTTOM printable part: bottom plate + bottom outline + insert holes
+module bottom_part() {
+    difference() {
+        union() {
+            bottom_plate();
+            plate_outline(BOT_OUTLINE_H, -PLATE_GAP - PLATE_THICKNESS);
+            screw_bosses_bottom();
+        }
+        component_cutouts();
         bottom_insert_holes();
+    }
+}
+
+// one complete half (both printable parts)
+module board_half() {
+    union() {
+        top_part();
+        bottom_part();
     }
 }
 
@@ -212,8 +235,24 @@ function _max_x(p, i=0, m=-1e9) =
 
 BOARD_W = _max_x(outer);        // width of one half (board starts at x=0)
 
-board_half();                                                       // right half
-translate([2*BOARD_W + SPLIT_GAP, 0, 0]) mirror([1,0,0]) board_half(); // mirrored half
+// ---- Export selector -------------------------------------------------------
+// Render a single printable part: openscad -D 'PART="top"' -D 'SIDE="left"' ...
+PART = "all";    // "all" | "top" | "bottom"
+SIDE = "both";   // "both" | "left" | "right"
+
+module selected() {
+    if (SIDE == "left" || SIDE == "both") {
+        if (PART == "top"    || PART == "all") top_part();
+        if (PART == "bottom" || PART == "all") bottom_part();
+    }
+    if (SIDE == "right" || SIDE == "both") {
+        translate([2*BOARD_W + SPLIT_GAP, 0, 0]) mirror([1,0,0]) {
+            if (PART == "top"    || PART == "all") top_part();
+            if (PART == "bottom" || PART == "all") bottom_part();
+        }
+    }
+}
+selected();
 
 // --- Or load the DXF files (same geometry) ---
 // difference() {
