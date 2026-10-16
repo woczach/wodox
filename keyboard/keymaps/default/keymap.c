@@ -122,8 +122,8 @@ enum combo_events {
 
 const uint16_t PROGMEM cb_yu[]    = {KC_Y, KC_U, COMBO_END};
 const uint16_t PROGMEM cb_ui[]    = {KC_U, KC_I, COMBO_END};
-const uint16_t PROGMEM cb_hj[]    = {KC_H, KC_J, COMBO_END};
-const uint16_t PROGMEM cb_jk[]    = {KC_J, KC_K, COMBO_END};
+const uint16_t PROGMEM cb_hj[]    = {LSFT_T(KC_H), LCTL_T(KC_J), COMBO_END};
+const uint16_t PROGMEM cb_jk[]    = {LCTL_T(KC_J), KC_K, COMBO_END};
 const uint16_t PROGMEM cb_nm[]    = {KC_N, KC_M, COMBO_END};
 const uint16_t PROGMEM cb_mcomm[] = {KC_M, KC_COMM, COMBO_END};
 
