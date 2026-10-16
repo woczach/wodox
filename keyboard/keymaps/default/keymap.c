@@ -111,6 +111,31 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 
+enum combo_events {
+    CB_YU_LPRN,
+    CB_UI_RPRN,
+    CB_HJ_LBRC,
+    CB_JK_RBRC,
+    CB_NM_LCBR,
+    CB_MCOMM_RCBR,
+};
+
+const uint16_t PROGMEM cb_yu[]    = {KC_Y, KC_U, COMBO_END};
+const uint16_t PROGMEM cb_ui[]    = {KC_U, KC_I, COMBO_END};
+const uint16_t PROGMEM cb_hj[]    = {KC_H, KC_J, COMBO_END};
+const uint16_t PROGMEM cb_jk[]    = {KC_J, KC_K, COMBO_END};
+const uint16_t PROGMEM cb_nm[]    = {KC_N, KC_M, COMBO_END};
+const uint16_t PROGMEM cb_mcomm[] = {KC_M, KC_COMM, COMBO_END};
+
+combo_t key_combos[] = {
+    [CB_YU_LPRN]    = COMBO(cb_yu, KC_LPRN),
+    [CB_UI_RPRN]    = COMBO(cb_ui, KC_RPRN),
+    [CB_HJ_LBRC]    = COMBO(cb_hj, KC_LBRC),
+    [CB_JK_RBRC]    = COMBO(cb_jk, KC_RBRC),
+    [CB_NM_LCBR]    = COMBO(cb_nm, KC_LCBR),
+    [CB_MCOMM_RCBR] = COMBO(cb_mcomm, KC_RCBR),
+};
+
 /* Numpad layer indicator: numbers red, + blue, - pulsing yellow, rest off */
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if (!layer_state_is(_NUMPAD)) {
