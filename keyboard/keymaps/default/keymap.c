@@ -34,13 +34,13 @@ enum layers {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_BASE] = LAYOUT(
         // left                          right
-        KC_1,    KC_2,    KC_3,    KC_4,    KC_5,  KC_LBRC, 	KC_PGUP,  KC_6,    KC_7,    KC_8,    KC_9,    KC_0,  
-        KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,  KC_RBRC,    	KC_PGDN, KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   
+        KC_1,    KC_2,    KC_3,    KC_4,    KC_5,  KC_PGUP, 	KC_MINS,  KC_6,    KC_7,    KC_8,    KC_9,    KC_0,  
+        KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,  KC_PGDN,    	KC_EQL, KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,   
         LCTL_T(KC_A), LT(_MOUSE, KC_S), KC_D, LCTL_T(KC_F), LSFT_T(KC_G),       LSFT_T(KC_H), LCTL_T(KC_J), KC_K, KC_L, RGUI_T(KC_SCLN),
         KC_Z,    KC_X,    KC_C,    LT(_NUMPAD, KC_V), KC_B,       KC_N,    KC_M,    KC_COMM, KC_DOT, KC_SLSH,
         // left thumbs                   right thumbs
-        LT(_NAV, KC_ESC), KC_LSFT, TG(_NUMPAD),                    KC_UP,   KC_ENT,  RALT_T(KC_QUOT),
-        KC_BSPC, LT(_ALT, KC_TAB), KC_DEL,                         KC_DOWN, KC_RSFT, KC_SPC
+        LT(_NAV, KC_ESC), KC_GRV, KC_PSCR,                    KC_HOME,   KC_END,  RALT_T(KC_QUOT),
+        KC_BSPC, LT(_ALT, KC_TAB), KC_DEL,                         KC_BSLS, KC_ENT, KC_SPC
     ),
 
     /* numpad, hold V or toggle with left thumb Num */
