@@ -29,17 +29,26 @@ enum layers {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_BASE] = LAYOUT(
-        KC_ESC,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    TG(_NUMPAD),
-        KC_UP,   KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    LT(_SYM, KC_MINS),
+        KC_1,    KC_2,    KC_3,    KC_4,    KC_5, 
+	KC_8, KC_ESC,
+        KC_UP,   LT(_SYM, KC_MINS),
+	KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    
 
-        KC_GRV,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_DEL,
-        KC_DOWN, KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_EQL,
+	KC_Q,    KC_W,    KC_E,    KC_R,    KC_T, 
+	KC_DEL, KC_GRV, 
+        KC_DOWN, KC_EQL,
+	KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    
+	
 
-        LCTL_T(KC_A), LT(_MOUSE, KC_S), KC_D, LCTL_T(KC_F), LSFT_T(KC_G), LT(_NAV, KC_ESC), KC_LSFT,
-        KC_ENT,  RALT_T(KC_QUOT), LSFT_T(KC_H), LCTL_T(KC_J), KC_K, KC_L, RGUI_T(KC_SCLN),
+        LCTL_T(KC_A), LT(_MOUSE, KC_S), KC_D, LCTL_T(KC_F), LSFT_T(KC_G), 
+	LT(_NAV, KC_ESC), KC_LSFT,
+        KC_ENT,  RALT_T(KC_QUOT), 
+	LSFT_T(KC_H), LCTL_T(KC_J), KC_K, KC_L, RGUI_T(KC_SCLN),
 
-        KC_Z,    KC_X,    KC_C,    LT(_NUMPAD, KC_V), KC_B,    KC_BSPC, LT(_ALT, KC_TAB),
-        KC_RSFT, KC_SPC,  KC_N,    KC_M,    KC_COMM, KC_DOT, KC_SLSH
+        KC_Z,    KC_X,    KC_C,    LT(_NUMPAD, KC_V), KC_B,    
+	KC_BSPC, LT(_ALT, KC_TAB),
+        KC_RSFT, KC_SPC,  
+	KC_N,    KC_M,    KC_COMM, KC_DOT, KC_SLSH
     ),
 
     /* numpad, hold V or toggle with left thumb TG(1) */
