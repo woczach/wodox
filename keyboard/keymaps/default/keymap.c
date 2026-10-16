@@ -65,10 +65,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* navigation / F-keys, hold left thumb Esc */
     [_NAV] = LAYOUT(
         KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,  _______,	 _______, KC_F6, KC_F7,   KC_F8,   KC_F9,   KC_F10,
-        _______, _______, _______, _______, _______, KC_LBRC,       KC_RBRC, _______, _______, _______, _______, KC_F11,
+        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, KC_F11,
         _______, _______, _______, _______, _______,                KC_LEFT, KC_DOWN, KC_UP, KC_RGHT, KC_F12,
         _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, KC_PGUP, KC_HOME,                                   KC_VOLD, KC_VOLD,KC_PSCR,
+        _______, _______, KC_HOME,                                   KC_VOLD, KC_VOLD,_______,
         _______,_______,_______,				     _______,_______,_______
     ),
 
@@ -136,8 +136,23 @@ combo_t key_combos[] = {
     [CB_MCOMM_RCBR] = COMBO(cb_mcomm, KC_RCBR),
 };
 
-/* Numpad layer indicator: numbers red, + blue, - pulsing yellow, rest off */
+/* NAV: hue sweep across the left half, right half dark. NUMPAD: numbers red, + blue, - pulsing yellow, rest off */
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+    if (layer_state_is(_NAV)) {
+        if (!is_keyboard_left()) {
+            rgb_matrix_set_color_all(RGB_BLACK);
+            return true;
+        }
+        for (uint8_t i = led_min; i < led_max; i++) {
+            led_point_t p   = g_led_config.point[i];
+            uint8_t     hue = (uint8_t)(p.x * 3 + p.y * 2 + timer_read32() / 24);
+            uint8_t     val = (uint8_t)(180 + 75 * sinf((float)timer_read32() / 350.0f + (float)p.x / 10.0f));
+            RGB         rgb = hsv_to_rgb((HSV){hue, 255, val});
+            rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
+        }
+        return true;
+    }
+
     if (!layer_state_is(_NUMPAD)) {
         return true;
     }
