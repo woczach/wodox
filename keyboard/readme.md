@@ -34,4 +34,3 @@ Enter the bootloader in 3 ways:
 * Rows: GP5, GP6, GP7, GP8; Cols: GP3, GP1, GP4, GP10, GP11, GP12, GP13
 * Split serial (TRRS ring1): GP0
 * Per-key WS2812 data: GP9 (28 LEDs per half)
-* Vial firmware: `make wodox:vial` (requires [vial-qmk](https://github.com/vial-kb/vial-qmk))

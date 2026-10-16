@@ -15,6 +15,16 @@ enum layers {
 };
 
 /*
+ * Macros (previously Vial EEPROM macros 0-15):
+ *   MACRO_0 = Ctrl+Alt+Shift+X
+ *   MACRO_2 = Ctrl+Alt+Shift+Z
+ */
+enum custom_keycodes {
+    MACRO_0 = SAFE_RANGE,
+    MACRO_2,
+};
+
+/*
  *      ┌───┬───┬───┬───┬───┬───┐       ┌───┬───┬───┬───┬───┬───┐
  *      │Esc│ 1 │ 2 │ 3 │ 4 │ 5 │       │ 6 │ 7 │ 8 │ 9 │ 0 │ - │
  *      ├───┼───┼───┼───┼───┼───┤       ├───┼───┼───┼───┼───┼───┤
@@ -67,7 +77,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,  _______,	 _______, KC_F6, KC_F7,   KC_F8,   KC_F9,   KC_F10,
         _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, KC_F11,
         _______, _______, _______, _______, _______,                KC_LEFT, KC_DOWN, KC_UP, KC_RGHT, KC_F12,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
+        MACRO_2, MACRO_0, _______, _______, _______,                _______, _______, _______, _______, _______,
         _______, _______, KC_HOME,                                   KC_VOLD, KC_VOLD,_______,
         _______,_______,_______,				     _______,_______,_______
     ),
@@ -184,17 +194,18 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     return true;
 }
 
-/*
- * VIA keeps the active keymap in EEPROM (dynamic keymap) and only resets it
- * when its build-date magic changes, so a layout can survive same-day
- * reflashes. Bump VIA_LAYOUT_EPOCH whenever the compiled layout changes to
- * replace the stale EEPROM keymap with the one in flash (once per flash).
- */
-#define VIA_LAYOUT_EPOCH 0x776F0002
-
-void keyboard_post_init_user(void) {
-    if (eeconfig_read_user() != VIA_LAYOUT_EPOCH) {
-        eeconfig_init_via();
-        eeconfig_update_user(VIA_LAYOUT_EPOCH);
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case MACRO_0:
+            if (record->event.pressed) {
+                tap_code16(MEH(KC_X));
+            }
+            return false;
+        case MACRO_2:
+            if (record->event.pressed) {
+                tap_code16(MEH(KC_Z));
+            }
+            return false;
     }
+    return true;
 }
