@@ -183,3 +183,18 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     }
     return true;
 }
+
+/*
+ * VIA keeps the active keymap in EEPROM (dynamic keymap) and only resets it
+ * when its build-date magic changes, so a layout can survive same-day
+ * reflashes. Bump VIA_LAYOUT_EPOCH whenever the compiled layout changes to
+ * replace the stale EEPROM keymap with the one in flash (once per flash).
+ */
+#define VIA_LAYOUT_EPOCH 0x776F0002
+
+void keyboard_post_init_user(void) {
+    if (eeconfig_read_user() != VIA_LAYOUT_EPOCH) {
+        eeconfig_init_via();
+        eeconfig_update_user(VIA_LAYOUT_EPOCH);
+    }
+}
