@@ -146,51 +146,131 @@ combo_t key_combos[] = {
     [CB_MCOMM_RCBR] = COMBO(cb_mcomm, KC_RCBR),
 };
 
-/* NAV: hue sweep across the left half, right half dark. NUMPAD: numbers red, + blue, - pulsing yellow, rest off */
+/* Breathing brightness, phase-shifted so neighbouring keys pulse together. */
+static RGB breathe(uint8_t hue, uint8_t phase) {
+    uint8_t val = (uint8_t)(140 + 115 * sinf((float)(timer_read32() + phase * 40) / 900.0f));
+    return hsv_to_rgb((HSV){hue, 255, val});
+}
+
+/*
+ * Per-layer RGB. The base layer keeps the configured default animation.
+ *   NUMPAD: numbers rainbow-breathe, * red, + orange, - green, / blue, . yellow
+ *   NAV:    F-keys rainbow-breathe, arrows green->red, other keys tinted
+ *   ALT:    only the keys present on the layer glow (rainbow breathe)
+ */
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     if (layer_state_is(_NAV)) {
-        if (!is_keyboard_left()) {
-            rgb_matrix_set_color_all(RGB_BLACK);
-            return true;
-        }
-        for (uint8_t i = led_min; i < led_max; i++) {
-            led_point_t p   = g_led_config.point[i];
-            uint8_t     hue = (uint8_t)(p.x * 3 + p.y * 2 + timer_read32() / 24);
-            uint8_t     val = (uint8_t)(180 + 75 * sinf((float)timer_read32() / 350.0f + (float)p.x / 10.0f));
-            RGB         rgb = hsv_to_rgb((HSV){hue, 255, val});
-            rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
+        rgb_matrix_set_color_all(RGB_BLACK);
+        for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+            for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+                uint8_t   i   = g_led_config.matrix_co[row][col];
+                keypos_t  key = {.row = row, .col = col};
+                uint16_t  kc  = keymap_key_to_keycode(_NAV, key);
+                if (i == NO_LED || i < led_min || i >= led_max || kc == KC_TRANSPARENT || kc == KC_NO) {
+                    continue;
+                }
+                if (kc >= KC_F1 && kc <= KC_F12) {
+                    uint8_t f   = kc - KC_F1;
+                    RGB     rgb = breathe((uint8_t)(f * 255 / 12 + timer_read32() / 24), f);
+                    rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
+                    continue;
+                }
+                switch (kc) {
+                    case KC_LEFT: {
+                        RGB c = hsv_to_rgb((HSV){85, 255, 255});
+                        rgb_matrix_set_color(i, c.r, c.g, c.b);
+                        break;
+                    }
+                    case KC_DOWN: {
+                        RGB c = hsv_to_rgb((HSV){57, 255, 255});
+                        rgb_matrix_set_color(i, c.r, c.g, c.b);
+                        break;
+                    }
+                    case KC_UP: {
+                        RGB c = hsv_to_rgb((HSV){28, 255, 255});
+                        rgb_matrix_set_color(i, c.r, c.g, c.b);
+                        break;
+                    }
+                    case KC_RGHT: {
+                        RGB c = hsv_to_rgb((HSV){0, 255, 255});
+                        rgb_matrix_set_color(i, c.r, c.g, c.b);
+                        break;
+                    }
+                    case MACRO_0:
+                        rgb_matrix_set_color(i, RGB_CYAN);
+                        break;
+                    case MACRO_2:
+                        rgb_matrix_set_color(i, RGB_MAGENTA);
+                        break;
+                    case KC_HOME:
+                        rgb_matrix_set_color(i, RGB_PURPLE);
+                        break;
+                    case KC_VOLD:
+                        rgb_matrix_set_color(i, RGB_WHITE);
+                        break;
+                }
+            }
         }
         return true;
     }
 
-    if (!layer_state_is(_NUMPAD)) {
-        return true;
-    }
-    rgb_matrix_set_color_all(RGB_BLACK);
-    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
-        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
-            uint8_t   i   = g_led_config.matrix_co[row][col];
-            keypos_t  key = {.row = row, .col = col};
-            if (i == NO_LED || i < led_min || i >= led_max) {
-                continue;
-            }
-            switch (keymap_key_to_keycode(_NUMPAD, key)) {
-                case KC_KP_1 ... KC_KP_9:
-                case KC_KP_0:
-                    rgb_matrix_set_color(i, RGB_RED);
-                    break;
-                case KC_KP_PLUS:
-                    rgb_matrix_set_color(i, RGB_BLUE);
-                    break;
-                case KC_KP_MINUS: {
-                    uint8_t v   = (uint8_t)(127.0f + 127.0f * sinf(timer_read32() / 300.0f));
-                    RGB     rgb = hsv_to_rgb((HSV){43, 255, v});
-                    rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
-                    break;
+    if (layer_state_is(_NUMPAD)) {
+        rgb_matrix_set_color_all(RGB_BLACK);
+        for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+            for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+                uint8_t   i   = g_led_config.matrix_co[row][col];
+                keypos_t  key = {.row = row, .col = col};
+                uint16_t  kc  = keymap_key_to_keycode(_NUMPAD, key);
+                if (i == NO_LED || i < led_min || i >= led_max || kc == KC_TRANSPARENT || kc == KC_NO) {
+                    continue;
+                }
+                switch (kc) {
+                    case KC_KP_1 ... KC_KP_9:
+                    case KC_KP_0: {
+                        uint8_t n   = (kc == KC_KP_0) ? 0 : (uint8_t)(kc - KC_KP_1 + 1);
+                        RGB     rgb = breathe((uint8_t)(n * 255 / 10 + timer_read32() / 24), n);
+                        rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
+                        break;
+                    }
+                    case KC_KP_ASTERISK:
+                        rgb_matrix_set_color(i, RGB_RED);
+                        break;
+                    case KC_KP_PLUS:
+                        rgb_matrix_set_color(i, RGB_ORANGE);
+                        break;
+                    case KC_KP_MINUS:
+                        rgb_matrix_set_color(i, RGB_GREEN);
+                        break;
+                    case KC_KP_SLASH:
+                        rgb_matrix_set_color(i, RGB_BLUE);
+                        break;
+                    case KC_KP_DOT:
+                        rgb_matrix_set_color(i, RGB_YELLOW);
+                        break;
                 }
             }
         }
+        return true;
     }
+
+    if (layer_state_is(_ALT)) {
+        rgb_matrix_set_color_all(RGB_BLACK);
+        for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+            for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+                uint8_t   i   = g_led_config.matrix_co[row][col];
+                keypos_t  key = {.row = row, .col = col};
+                uint16_t  kc  = keymap_key_to_keycode(_ALT, key);
+                if (i == NO_LED || i < led_min || i >= led_max || kc == KC_TRANSPARENT || kc == KC_NO) {
+                    continue;
+                }
+                uint8_t phase = (uint8_t)(row * 6 + col * 3);
+                RGB     rgb   = breathe((uint8_t)(phase * 8 + timer_read32() / 24), phase);
+                rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
+            }
+        }
+        return true;
+    }
+
     return true;
 }
 
