@@ -78,7 +78,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, KC_F11,
         _______, _______, _______, _______, _______,                KC_LEFT, KC_DOWN, KC_UP, KC_RGHT, KC_F12,
         MACRO_2, MACRO_0, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, _______, KC_HOME,                                   KC_VOLD, KC_VOLD,_______,
+        _______, _______, KC_HOME,                                   KC_VOLU, KC_VOLD,_______,
         _______,_______,_______,				     _______,_______,_______
     ),
 
@@ -146,131 +146,119 @@ combo_t key_combos[] = {
     [CB_MCOMM_RCBR] = COMBO(cb_mcomm, KC_RCBR),
 };
 
-/* Breathing brightness, phase-shifted so neighbouring keys pulse together. */
-static RGB breathe(uint8_t hue, uint8_t phase) {
-    uint8_t val = (uint8_t)(140 + 115 * sinf((float)(timer_read32() + phase * 40) / 900.0f));
+/* Breathing brightness, phase-shifted per key. */
+static RGB pulse_rgb(uint8_t hue, uint8_t phase) {
+    uint8_t val = (uint8_t)(140 + 115 * sinf((float)(timer_read() + phase * 20) / 700.0f));
     return hsv_to_rgb((HSV){hue, 255, val});
 }
 
+static void set_pulse(uint8_t i) {
+    led_point_t p   = g_led_config.point[i];
+    uint8_t     hue = (uint8_t)(p.x * 3 + p.y * 2 + timer_read() / 24);
+    RGB         c   = pulse_rgb(hue, (uint8_t)(p.x + p.y));
+    rgb_matrix_set_color(i, c.r, c.g, c.b);
+}
+
 /*
- * Per-layer RGB. The base layer keeps the configured default animation.
+ * Per-layer RGB driven purely by LED index (no matrix/keymap lookups).
+ * Indices below are the current LAYOUT's LEDs; update them if the keymap moves.
  *   NUMPAD: numbers rainbow-breathe, * red, + orange, - green, / blue, . yellow
  *   NAV:    F-keys rainbow-breathe, arrows green->red, other keys tinted
- *   ALT:    only the keys present on the layer glow (rainbow breathe)
+ *   ALT:    only the keys on the layer glow (rainbow breathe)
  */
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
-    if (layer_state_is(_NAV)) {
-        rgb_matrix_set_color_all(RGB_BLACK);
-        for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
-            for (uint8_t col = 0; col < MATRIX_COLS; col++) {
-                uint8_t   i   = g_led_config.matrix_co[row][col];
-                keypos_t  key = {.row = row, .col = col};
-                uint16_t  kc  = keymap_key_to_keycode(_NAV, key);
-                if (i == NO_LED || i < led_min || i >= led_max || kc == KC_TRANSPARENT || kc == KC_NO) {
-                    continue;
-                }
-                if (kc >= KC_F1 && kc <= KC_F12) {
-                    uint8_t f   = kc - KC_F1;
-                    RGB     rgb = breathe((uint8_t)(f * 255 / 12 + timer_read32() / 24), f);
-                    rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
-                    continue;
-                }
-                switch (kc) {
-                    case KC_LEFT: {
-                        RGB c = hsv_to_rgb((HSV){85, 255, 255});
-                        rgb_matrix_set_color(i, c.r, c.g, c.b);
-                        break;
-                    }
-                    case KC_DOWN: {
-                        RGB c = hsv_to_rgb((HSV){57, 255, 255});
-                        rgb_matrix_set_color(i, c.r, c.g, c.b);
-                        break;
-                    }
-                    case KC_UP: {
-                        RGB c = hsv_to_rgb((HSV){28, 255, 255});
-                        rgb_matrix_set_color(i, c.r, c.g, c.b);
-                        break;
-                    }
-                    case KC_RGHT: {
-                        RGB c = hsv_to_rgb((HSV){0, 255, 255});
-                        rgb_matrix_set_color(i, c.r, c.g, c.b);
-                        break;
-                    }
-                    case MACRO_0:
-                        rgb_matrix_set_color(i, RGB_CYAN);
-                        break;
-                    case MACRO_2:
-                        rgb_matrix_set_color(i, RGB_MAGENTA);
-                        break;
-                    case KC_HOME:
-                        rgb_matrix_set_color(i, RGB_PURPLE);
-                        break;
-                    case KC_VOLD:
-                        rgb_matrix_set_color(i, RGB_WHITE);
-                        break;
-                }
-            }
-        }
+    uint8_t layer = get_highest_layer(layer_state);
+
+    if (layer != _NUMPAD && layer != _NAV && layer != _ALT) {
         return true;
     }
 
-    if (layer_state_is(_NUMPAD)) {
-        rgb_matrix_set_color_all(RGB_BLACK);
-        for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
-            for (uint8_t col = 0; col < MATRIX_COLS; col++) {
-                uint8_t   i   = g_led_config.matrix_co[row][col];
-                keypos_t  key = {.row = row, .col = col};
-                uint16_t  kc  = keymap_key_to_keycode(_NUMPAD, key);
-                if (i == NO_LED || i < led_min || i >= led_max || kc == KC_TRANSPARENT || kc == KC_NO) {
-                    continue;
+    for (uint8_t i = led_min; i < led_max; i++) {
+        if (layer == _NUMPAD) {
+            switch (i) {
+                case 32:  // *
+                    rgb_matrix_set_color(i, RGB_RED);
+                    break;
+                case 37:  // +
+                    rgb_matrix_set_color(i, RGB_ORANGE);
+                    break;
+                case 30:  // -
+                    rgb_matrix_set_color(i, RGB_GREEN);
+                    break;
+                case 31:  // /
+                    rgb_matrix_set_color(i, RGB_BLUE);
+                    break;
+                case 46:  // .
+                    rgb_matrix_set_color(i, RGB_YELLOW);
+                    break;
+                case 51: case 52: case 53:  // 1 2 3
+                case 43: case 42: case 41:  // 4 5 6
+                case 34: case 35: case 36:  // 7 8 9
+                case 45:                    // 0
+                    set_pulse(i);
+                    break;
+                default:
+                    rgb_matrix_set_color(i, RGB_BLACK);
+                    break;
+            }
+        } else if (layer == _NAV) {
+            switch (i) {
+                case 0: case 1: case 2: case 3: case 4:              // F1-F5
+                case 32: case 31: case 30: case 29: case 28:         // F6-F10
+                case 38: case 39:                                    // F11 F12
+                    set_pulse(i);
+                    break;
+                case 43: {  // Left  - green
+                    RGB c = hsv_to_rgb((HSV){85, 255, 255});
+                    rgb_matrix_set_color(i, c.r, c.g, c.b);
+                    break;
                 }
-                switch (kc) {
-                    case KC_KP_1 ... KC_KP_9:
-                    case KC_KP_0: {
-                        uint8_t n   = (kc == KC_KP_0) ? 0 : (uint8_t)(kc - KC_KP_1 + 1);
-                        RGB     rgb = breathe((uint8_t)(n * 255 / 10 + timer_read32() / 24), n);
-                        rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
-                        break;
-                    }
-                    case KC_KP_ASTERISK:
-                        rgb_matrix_set_color(i, RGB_RED);
-                        break;
-                    case KC_KP_PLUS:
-                        rgb_matrix_set_color(i, RGB_ORANGE);
-                        break;
-                    case KC_KP_MINUS:
-                        rgb_matrix_set_color(i, RGB_GREEN);
-                        break;
-                    case KC_KP_SLASH:
-                        rgb_matrix_set_color(i, RGB_BLUE);
-                        break;
-                    case KC_KP_DOT:
-                        rgb_matrix_set_color(i, RGB_YELLOW);
-                        break;
+                case 42: {  // Down
+                    RGB c = hsv_to_rgb((HSV){57, 255, 255});
+                    rgb_matrix_set_color(i, c.r, c.g, c.b);
+                    break;
                 }
+                case 41: {  // Up
+                    RGB c = hsv_to_rgb((HSV){28, 255, 255});
+                    rgb_matrix_set_color(i, c.r, c.g, c.b);
+                    break;
+                }
+                case 40: {  // Right - red
+                    RGB c = hsv_to_rgb((HSV){0, 255, 255});
+                    rgb_matrix_set_color(i, c.r, c.g, c.b);
+                    break;
+                }
+                case 26:  // macro 0 (X)
+                    rgb_matrix_set_color(i, RGB_CYAN);
+                    break;
+                case 27:  // macro 2 (Z)
+                    rgb_matrix_set_color(i, RGB_MAGENTA);
+                    break;
+                case 20:  // Home
+                    rgb_matrix_set_color(i, RGB_PURPLE);
+                    break;
+                case 48: case 49:  // Vol-
+                    rgb_matrix_set_color(i, RGB_WHITE);
+                    break;
+                default:
+                    rgb_matrix_set_color(i, RGB_BLACK);
+                    break;
+            }
+        } else {  // _ALT
+            switch (i) {
+                case 0: case 1: case 2: case 3: case 4:
+                case 10:
+                case 11: case 12: case 13: case 14: case 15:
+                case 23: case 24: case 25: case 26: case 27:
+                case 40: case 45: case 47: case 48: case 49:
+                    set_pulse(i);
+                    break;
+                default:
+                    rgb_matrix_set_color(i, RGB_BLACK);
+                    break;
             }
         }
-        return true;
     }
-
-    if (layer_state_is(_ALT)) {
-        rgb_matrix_set_color_all(RGB_BLACK);
-        for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
-            for (uint8_t col = 0; col < MATRIX_COLS; col++) {
-                uint8_t   i   = g_led_config.matrix_co[row][col];
-                keypos_t  key = {.row = row, .col = col};
-                uint16_t  kc  = keymap_key_to_keycode(_ALT, key);
-                if (i == NO_LED || i < led_min || i >= led_max || kc == KC_TRANSPARENT || kc == KC_NO) {
-                    continue;
-                }
-                uint8_t phase = (uint8_t)(row * 6 + col * 3);
-                RGB     rgb   = breathe((uint8_t)(phase * 8 + timer_read32() / 24), phase);
-                rgb_matrix_set_color(i, rgb.r, rgb.g, rgb.b);
-            }
-        }
-        return true;
-    }
-
     return true;
 }
 
@@ -288,4 +276,19 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             return false;
     }
     return true;
+}
+
+/*
+ * VIA/Vial are gone, but their RGB config survives in EEPROM. Wipe it once
+ * and force a known effect so the per-layer indicators always run.
+ */
+#define EECONFIG_EPOCH 0x776F0005
+
+void keyboard_post_init_user(void) {
+    if (eeconfig_read_user() != EECONFIG_EPOCH) {
+        eeconfig_init();
+        eeconfig_update_user(EECONFIG_EPOCH);
+    }
+    rgb_matrix_enable_noeeprom();
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_GRADIENT_UP_DOWN);
 }
