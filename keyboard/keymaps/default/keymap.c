@@ -53,12 +53,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_BSPC, LT(_ALT, KC_TAB), KC_DEL,                         LT(_NUMPAD, KC_BSLS), LT(_NAV, KC_ENT), KC_SPC
     ),
 
-    /* numpad, hold V or toggle with left thumb Num */
+    /* numpad, hold V or toggle with left thumb Num. Left QWERTY keys = RGB controls. */
     [_NUMPAD] = LAYOUT(
         _______, _______, _______, _______, _______, _______,       _______, KC_PAST, KC_PSLS, KC_PMNS, _______, _______,
-        _______, _______, _______, _______, _______, _______,       _______, KC_P7,   KC_P8,   KC_P9,   KC_PPLS, _______,
-        _______, _______, _______, _______, _______,                KC_P4,   KC_P5,   KC_P6,   _______, _______,
-        _______, _______, _______, _______, _______,                KC_P1,   KC_P2,   KC_P3,   _______, _______,
+        RM_TOGG, RM_NEXT, RM_PREV, RM_HUEU, RM_HUED, RM_SATU,       _______, KC_P7,   KC_P8,   KC_P9,   KC_PPLS, _______,
+        RM_SATD, RM_VALU, RM_VALD, RM_SPDU, RM_SPDD,                KC_P4,   KC_P5,   KC_P6,   _______, _______,
+        RGB_M_P, RGB_M_B, RGB_M_R, _______, RGB_M_G,                KC_P1,   KC_P2,   KC_P3,   _______, _______,
         _______, _______, _______,                                   _______, KC_PENT, _______,
         _______, _______, _______,                                   _______, KC_PDOT, KC_P0
     ),
@@ -146,16 +146,32 @@ combo_t key_combos[] = {
     [CB_MCOMM_RCBR] = COMBO(cb_mcomm, KC_RCBR),
 };
 
-/* Breathing brightness, phase-shifted per key. */
+/*
+ * Breathing brightness, phase-shifted per key. Honors the global RGB
+ * hue/saturation/brightness so the RGB control keycodes dim/tint these
+ * layers too (plain rgb_matrix_set_color bypasses them).
+ */
 static RGB pulse_rgb(uint8_t hue, uint8_t phase) {
     uint8_t val = (uint8_t)(140 + 115 * sinf((float)(timer_read() + phase * 20) / 700.0f));
-    return hsv_to_rgb((HSV){hue, 255, val});
+    val         = (uint8_t)((uint16_t)val * rgb_matrix_config.hsv.v / 255);
+    return hsv_to_rgb((HSV){(uint8_t)(hue + rgb_matrix_config.hsv.h), rgb_matrix_config.hsv.s, val});
 }
 
 static void set_pulse(uint8_t i) {
     led_point_t p   = g_led_config.point[i];
     uint8_t     hue = (uint8_t)(p.x * 3 + p.y * 2 + timer_read() / 24);
     RGB         c   = pulse_rgb(hue, (uint8_t)(p.x + p.y));
+    rgb_matrix_set_color(i, c.r, c.g, c.b);
+}
+
+static void set_solid(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t v = rgb_matrix_config.hsv.v;
+    rgb_matrix_set_color(i, (uint8_t)((uint16_t)r * v / 255), (uint8_t)((uint16_t)g * v / 255), (uint8_t)((uint16_t)b * v / 255));
+}
+
+static void set_hue_solid(uint8_t i, uint8_t hue) {
+    HSV hsv = {(uint8_t)(hue + rgb_matrix_config.hsv.h), rgb_matrix_config.hsv.s, rgb_matrix_config.hsv.v};
+    RGB c   = hsv_to_rgb(hsv);
     rgb_matrix_set_color(i, c.r, c.g, c.b);
 }
 
@@ -177,19 +193,19 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
         if (layer == _NUMPAD) {
             switch (i) {
                 case 32:  // *
-                    rgb_matrix_set_color(i, RGB_RED);
+                    set_solid(i, RGB_RED);
                     break;
                 case 37:  // +
-                    rgb_matrix_set_color(i, RGB_ORANGE);
+                    set_solid(i, RGB_ORANGE);
                     break;
                 case 30:  // -
-                    rgb_matrix_set_color(i, RGB_GREEN);
+                    set_solid(i, RGB_GREEN);
                     break;
                 case 31:  // /
-                    rgb_matrix_set_color(i, RGB_BLUE);
+                    set_solid(i, RGB_BLUE);
                     break;
                 case 46:  // .
-                    rgb_matrix_set_color(i, RGB_YELLOW);
+                    set_solid(i, RGB_YELLOW);
                     break;
                 case 51: case 52: case 53:  // 1 2 3
                 case 43: case 42: case 41:  // 4 5 6
@@ -208,37 +224,29 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
                 case 38: case 39:                                    // F11 F12
                     set_pulse(i);
                     break;
-                case 43: {  // Left  - green
-                    RGB c = hsv_to_rgb((HSV){85, 255, 255});
-                    rgb_matrix_set_color(i, c.r, c.g, c.b);
+                case 43:  // Left  - green
+                    set_hue_solid(i, 85);
                     break;
-                }
-                case 42: {  // Down
-                    RGB c = hsv_to_rgb((HSV){57, 255, 255});
-                    rgb_matrix_set_color(i, c.r, c.g, c.b);
+                case 42:  // Down
+                    set_hue_solid(i, 57);
                     break;
-                }
-                case 41: {  // Up
-                    RGB c = hsv_to_rgb((HSV){28, 255, 255});
-                    rgb_matrix_set_color(i, c.r, c.g, c.b);
+                case 41:  // Up
+                    set_hue_solid(i, 28);
                     break;
-                }
-                case 40: {  // Right - red
-                    RGB c = hsv_to_rgb((HSV){0, 255, 255});
-                    rgb_matrix_set_color(i, c.r, c.g, c.b);
+                case 40:  // Right - red
+                    set_hue_solid(i, 0);
                     break;
-                }
                 case 26:  // macro 0 (X)
-                    rgb_matrix_set_color(i, RGB_CYAN);
+                    set_solid(i, RGB_CYAN);
                     break;
                 case 27:  // macro 2 (Z)
-                    rgb_matrix_set_color(i, RGB_MAGENTA);
+                    set_solid(i, RGB_MAGENTA);
                     break;
                 case 20:  // Home
-                    rgb_matrix_set_color(i, RGB_PURPLE);
+                    set_solid(i, RGB_PURPLE);
                     break;
                 case 48: case 49:  // Vol-
-                    rgb_matrix_set_color(i, RGB_WHITE);
+                    set_solid(i, RGB_WHITE);
                     break;
                 default:
                     rgb_matrix_set_color(i, RGB_BLACK);
@@ -280,15 +288,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 /*
  * VIA/Vial are gone, but their RGB config survives in EEPROM. Wipe it once
- * and force a known effect so the per-layer indicators always run.
+ * and set a known effect so the per-layer indicators always run. This runs
+ * only on the first boot after flashing; afterwards RM_NEXT/RM_PREV etc.
+ * persist normally.
  */
-#define EECONFIG_EPOCH 0x776F0005
+#define EECONFIG_EPOCH 0x776F0006
 
 void keyboard_post_init_user(void) {
     if (eeconfig_read_user() != EECONFIG_EPOCH) {
         eeconfig_init();
         eeconfig_update_user(EECONFIG_EPOCH);
+        rgb_matrix_enable_noeeprom();
+        rgb_matrix_mode_noeeprom(RGB_MATRIX_GRADIENT_UP_DOWN);
     }
-    rgb_matrix_enable_noeeprom();
-    rgb_matrix_mode_noeeprom(RGB_MATRIX_GRADIENT_UP_DOWN);
 }
