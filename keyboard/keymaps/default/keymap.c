@@ -5,13 +5,13 @@
 
 enum layers {
     _BASE,
-    _NUMPAD,
-    _SYM,
-    _NAV,
-    _MOUSE,
     _DEV,
     _TMUX,
     _ALT,
+    _NAV,
+    _NUMPAD,
+    _SYM,
+    _MOUSE,
 };
 
 /*

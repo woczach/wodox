@@ -4,13 +4,13 @@ draw_config:
 parse_config:
   layer_legends:
     - Base
-    - Numpad
-    - Sym
-    - Nav
-    - Mouse
     - Dev
     - Tmux
     - Alt
+    - Nav
+    - Numpad
+    - Sym
+    - Mouse
   qmk_keycode_map:
     MACRO_0: {t: "Meh X"}
     MACRO_2: {t: "Meh Z"}
