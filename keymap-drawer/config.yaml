@@ -23,6 +23,7 @@ parse_config:
     NV_EX: {t: ":Ex", s: "vim"}
     NV_WQ: {t: ":wq", s: "vim"}
     NV_W: {t: ":w", s: "vim"}
+    NV_QB: {t: ":q!", s: "vim"}
     NV_FMT: {t: "fmt", s: "nvim"}
     NV_GRN: {t: "grn", s: "LSP rename"}
     NV_GRD: {t: "grd", s: "LSP def"}

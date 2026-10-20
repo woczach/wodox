@@ -26,7 +26,7 @@ enum custom_keycodes {
     /* DEV (nvim) layer, <leader> = space; keys sit on their mnemonic letter. Search group */
     NV_SF, NV_SG, NV_SW, NV_RR, NV_SB, NV_SRES,
     /* nvim, file / format */
-    NV_EX, NV_WQ, NV_W, NV_FMT,
+    NV_EX, NV_WQ, NV_W, NV_QB, NV_FMT,
     /* nvim, LSP */
     NV_GRN, NV_GRD, NV_GRR, NV_GRA,
     /* vim text objects: ci( ci" ci{ vi( vi{ */
@@ -78,8 +78,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     /* nvim macros, tap (one-shot, next key only) or hold left thumb, top row 3rd key. Each macro sits on its mnemonic letter. */
     [_DEV] = LAYOUT(
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        NV_WQ,   NV_SW,   NV_EX,   NV_RR,   NV_FMT,  _______,       _______, NV_VIB,  NV_VIP,  NV_CIP,  NV_CIQ,  NV_CIB,
+        _______, _______, _______, _______, NV_WQ,   _______,       _______, _______, _______, _______, _______, _______,
+        NV_QB,   NV_SW,   NV_EX,   NV_RR,   NV_FMT,  _______,       _______, NV_VIB,  NV_VIP,  NV_CIP,  NV_CIQ,  NV_CIB,
         NV_SADD, NV_SRES, NV_GRD,  NV_SF,   NV_SG,                  _______, _______, _______, _______, _______,
         NV_W,    NV_SDEL, NV_SREP, _______, NV_SB,                  NV_GRN,  NV_GRR,  NV_GRA,  _______, _______,
         _______, _______, _______,                                   _______, _______, _______,
@@ -418,6 +418,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case NV_EX:      nv(":Ex\n");    return false;  // vim netrw
         case NV_WQ:      nv(":wq\n");    return false;  // vim
         case NV_W:       nv(":w\n");     return false;  // vim
+        case NV_QB:      nv(":q!\n");    return false;  // vim, quit discarding changes
         case NV_FMT:     nv(" f");       return false;  // conform format
         case NV_GRN:     nv("grn");      return false;  // LSP rename
         case NV_GRD:     nv("grd");      return false;  // LSP definition
