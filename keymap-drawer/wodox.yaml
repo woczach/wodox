@@ -298,33 +298,33 @@ layers:
   - PMNS
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - RM TOGG
+  - RM NEXT
+  - RM PREV
+  - RM HUEU
+  - RM HUED
+  - RM SATU
   - {t: ▽, type: trans}
   - P7
   - P8
   - P9
   - PPLS
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - RM SATD
+  - RM VALU
+  - RM VALD
+  - RM SPDU
+  - RM SPDD
   - P4
   - P5
   - P6
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - RGB M P
+  - RGB M B
+  - RGB M R
   - {type: held}
-  - {t: ▽, type: trans}
+  - RGB M G
   - P1
   - P2
   - P3
