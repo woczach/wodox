@@ -46,7 +46,7 @@ layers:
   - DOT
   - SLSH
   - {t: ESC, h: Nav}
-  - GRV
+  - {t: GRV, h: Tmux}
   - {t: PSCR, h: Dev}
   - HOME
   - END
@@ -286,50 +286,50 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   Dev:
-  - {t: sf, s: nvim files}
-  - {t: sg, s: nvim grep}
-  - {t: sw, s: nvim word}
-  - {t: rr, s: nvim}
-  - {t: bufs, s: nvim}
-  - {t: sr, s: nvim resume}
-  - {t: C-b y, s: browser}
-  - {t: C-b s, s: sessions}
-  - {t: C-b d, s: es.sh}
-  - {t: C-b r, s: newfile}
-  - {t: C-b c, s: new win}
-  - {t: C-b x, s: kill pane}
-  - {t: ':Ex', s: vim}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - {t: ':wq', s: vim}
-  - {t: ':w', s: vim}
+  - {t: sw, s: nvim word}
+  - {t: ':Ex', s: vim}
+  - {t: rr, s: nvim}
   - {t: fmt, s: nvim}
-  - {t: grn, s: LSP rename}
-  - {t: grd, s: LSP def}
-  - {t: C-b %, s: vsplit}
-  - {t: C-b ", s: hsplit}
-  - {t: C-b z, s: zoom}
-  - {t: 'C-b [', s: copy mode}
-  - {t: C-b n, s: next win}
-  - {t: C-b p, s: prev win}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: 'vi{', s: vim}
+  - {t: vi(, s: vim}
   - {t: ci(, s: vim}
   - {t: ci", s: vim}
   - {t: 'ci{', s: vim}
-  - {t: vi(, s: vim}
-  - {t: 'vi{', s: vim}
-  - {t: C-b ←, s: pane}
-  - {t: C-b ↓, s: pane}
-  - {t: C-b ↑, s: pane}
-  - {t: C-b →, s: pane}
-  - {t: C-b o, s: next pane}
   - {t: sa, s: surround add}
+  - {t: sr, s: nvim resume}
+  - {t: grd, s: LSP def}
+  - {t: sf, s: nvim files}
+  - {t: sg, s: nvim grep}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
+  - {t: ':w', s: vim}
   - {t: sd, s: surround del}
   - {t: sr, s: surround rep}
+  - {t: ▽, type: trans}
+  - {t: bufs, s: nvim}
+  - {t: grn, s: LSP rename}
   - {t: grr, s: LSP refs}
   - {t: gra, s: LSP action}
-  - {t: C-b w, s: win list}
-  - C-b 1
-  - C-b 2
-  - C-b 3
-  - {t: 'C-b ,', s: rename}
+  - {t: ▽, type: trans}
+  - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {type: held}
@@ -342,53 +342,53 @@ layers:
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  L6:
+  Tmux:
+  - C-b 1
+  - C-b 2
+  - C-b 3
+  - TM W4
+  - TM W5
+  - {t: ▽, type: trans}
+  - {t: C-b ", s: hsplit}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
+  - {t: C-b w, s: win list}
+  - {t: ▽, type: trans}
+  - {t: C-b r, s: newfile}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
+  - {t: C-b y, s: browser}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
+  - {t: C-b o, s: next pane}
+  - {t: C-b p, s: prev win}
+  - {t: ▽, type: trans}
+  - {t: C-b s, s: sessions}
+  - {t: C-b d, s: es.sh}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
+  - {t: C-b ←, s: pane}
+  - {t: C-b ↓, s: pane}
+  - {t: C-b ↑, s: pane}
+  - {t: C-b →, s: pane}
   - {t: ▽, type: trans}
+  - {t: C-b z, s: zoom}
+  - {t: C-b x, s: kill pane}
+  - {t: C-b c, s: new win}
+  - {t: C-b %, s: vsplit}
   - {t: ▽, type: trans}
+  - {t: C-b n, s: next win}
   - {t: ▽, type: trans}
+  - {t: 'C-b ,', s: rename}
   - {t: ▽, type: trans}
+  - {t: 'C-b [', s: copy mode}
   - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
-  - {t: ▽, type: trans}
+  - {type: held}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}

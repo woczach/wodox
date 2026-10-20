@@ -9,7 +9,7 @@ parse_config:
     - Nav
     - Mouse
     - Dev
-    - L6
+    - Tmux
     - Alt
   qmk_keycode_map:
     MACRO_0: {t: "Meh X"}

@@ -10,7 +10,7 @@ enum layers {
     _NAV,
     _MOUSE,
     _DEV,
-    _L6,
+    _TMUX,
     _ALT,
 };
 
@@ -23,7 +23,7 @@ enum custom_keycodes {
     MACRO_0 = SAFE_RANGE,
     MACRO_2,
 
-    /* DEV layer, nvim (<leader> = space), search group */
+    /* DEV (nvim) layer, <leader> = space; keys sit on their mnemonic letter. Search group */
     NV_SF, NV_SG, NV_SW, NV_RR, NV_SB, NV_SRES,
     /* nvim, file / format */
     NV_EX, NV_WQ, NV_W, NV_FMT,
@@ -34,14 +34,14 @@ enum custom_keycodes {
     /* nvim mini.surround: add around word / delete / replace */
     NV_SADD, NV_SDEL, NV_SREP,
 
-    /* DEV layer, tmux (prefix C-b), custom binds from .tmux.conf */
+    /* TMUX layer (prefix C-b), custom binds from .tmux.conf */
     TM_Y, TM_S, TM_D, TM_R,
     /* tmux, windows / panes */
     TM_NEW, TM_KILL, TM_VSPL, TM_HSPL, TM_ZOOM, TM_COPY, TM_NEXT, TM_PREV,
     /* tmux, pane focus */
     TM_PL, TM_PD, TM_PU, TM_PR, TM_PNXT,
     /* tmux, window list / jump / rename */
-    TM_LIST, TM_W1, TM_W2, TM_W3, TM_REN,
+    TM_LIST, TM_W1, TM_W2, TM_W3, TM_W4, TM_W5, TM_REN,
 };
 
 #define DEV_FIRST NV_SF
@@ -72,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LCTL_T(KC_A), KC_S, KC_D, LCTL_T(KC_F), LSFT_T(KC_G),       LSFT_T(KC_H), LCTL_T(KC_J), KC_K, KC_L, RGUI_T(KC_SCLN),
         KC_Z,    KC_X,    KC_C,    LT(_NUMPAD, KC_V), KC_B,       KC_N,    KC_M,    KC_COMM, KC_DOT, KC_SLSH,
         // left thumbs                   right thumbs
-        LT(_NAV, KC_ESC), KC_GRV, LT(_DEV, KC_PSCR),                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
+        LT(_NAV, KC_ESC), LT(_TMUX, KC_GRV), LT(_DEV, KC_PSCR),                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
         KC_BSPC, LT(_ALT, KC_TAB), KC_DEL,                         LT(_NUMPAD, KC_BSLS), LT(_NAV, KC_ENT), KC_SPC
     ),
 
@@ -115,21 +115,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______,                                   _______, _______, _______
     ),
 
-    /* dev macros, hold left thumb PrtSc. Left = nvim, right = tmux (see custom_keycodes) */
+    /* nvim macros, hold left thumb PrtSc. Each macro sits on its mnemonic letter. */
     [_DEV] = LAYOUT(
-        NV_SF,   NV_SG,   NV_SW,   NV_RR,   NV_SB,   NV_SRES,       TM_Y,    TM_S,    TM_D,    TM_R,    TM_NEW,  TM_KILL,
-        NV_EX,   NV_WQ,   NV_W,    NV_FMT,  NV_GRN,  NV_GRD,        TM_VSPL, TM_HSPL, TM_ZOOM, TM_COPY, TM_NEXT, TM_PREV,
-        NV_CIP,  NV_CIQ,  NV_CIB,  NV_VIP,  NV_VIB,                 TM_PL,   TM_PD,   TM_PU,   TM_PR,   TM_PNXT,
-        NV_SADD, NV_SDEL, NV_SREP, NV_GRR,  NV_GRA,                 TM_LIST, TM_W1,   TM_W2,   TM_W3,   TM_REN,
+        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
+        NV_WQ,   NV_SW,   NV_EX,   NV_RR,   NV_FMT,  _______,       _______, NV_VIB,  NV_VIP,  NV_CIP,  NV_CIQ,  NV_CIB,
+        NV_SADD, NV_SRES, NV_GRD,  NV_SF,   NV_SG,                  _______, _______, _______, _______, _______,
+        NV_W,    NV_SDEL, NV_SREP, _______, NV_SB,                  NV_GRN,  NV_GRR,  NV_GRA,  _______, _______,
         _______, _______, _______,                                   _______, _______, _______,
         _______, _______, _______,                                   _______, _______, _______
     ),
 
-    [_L6] = LAYOUT(
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
+    /* tmux macros (C-b prefix), hold left thumb `. Letters match the tmux key where possible */
+    [_TMUX] = LAYOUT(
+        TM_W1,   TM_W2,   TM_W3,   TM_W4,   TM_W5,   _______,       TM_HSPL, _______, _______, _______, _______, _______,
+        _______, TM_LIST, _______, TM_R,    _______, _______,       _______, TM_Y,    _______, _______, TM_PNXT, TM_PREV,
+        _______, TM_S,    TM_D,    _______, _______,                TM_PL,   TM_PD,   TM_PU,   TM_PR,   _______,
+        TM_ZOOM, TM_KILL, TM_NEW,  TM_VSPL, _______,                TM_NEXT, _______, TM_REN,  _______, TM_COPY,
         _______, _______, _______,                                   _______, _______, _______,
         _______, _______, _______,                                   _______, _______, _______
     ),
@@ -183,7 +184,7 @@ static void set_pulse(uint8_t i) {
     rgb_matrix_set_color(i, c.r, c.g, c.b);
 }
 
-/* Hue per DEV macro group, so nvim/tmux keys are told apart at a glance. */
+/* Hue per DEV/TMUX macro group, so nvim/tmux keys are told apart at a glance. */
 static uint8_t dev_hue(uint16_t kc) {
     switch (kc) {
         case NV_SF ... NV_SB: case NV_SRES: return 85;   // nvim search - green
@@ -224,7 +225,7 @@ static void light_configured_keys(uint8_t layer, uint8_t led_min, uint8_t led_ma
                 rgb_matrix_set_color(led, RGB_OFF);
                 continue;
             }
-            uint8_t hue = (layer == _DEV && kc >= DEV_FIRST && kc <= DEV_LAST) ? dev_hue(kc) : layer_hue(layer);
+            uint8_t hue = ((layer == _DEV || layer == _TMUX) && kc >= DEV_FIRST && kc <= DEV_LAST) ? dev_hue(kc) : layer_hue(layer);
             RGB     c   = hsv_to_rgb((HSV){hue, 255, 200});
             rgb_matrix_set_color(led, c.r, c.g, c.b);
         }
@@ -408,6 +409,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case TM_W1:      tm("1");        return false;
         case TM_W2:      tm("2");        return false;
         case TM_W3:      tm("3");        return false;
+        case TM_W4:      tm("4");        return false;
+        case TM_W5:      tm("5");        return false;
         case TM_REN:     tm(",");        return false;
     }
     return true;
