@@ -9,7 +9,7 @@ enum layers {
     _SYM,
     _NAV,
     _MOUSE,
-    _L5,
+    _DEV,
     _L6,
     _ALT,
 };
@@ -22,7 +22,30 @@ enum layers {
 enum custom_keycodes {
     MACRO_0 = SAFE_RANGE,
     MACRO_2,
+
+    /* DEV layer, nvim (<leader> = space), search group */
+    NV_SF, NV_SG, NV_SW, NV_RR, NV_SB, NV_SRES,
+    /* nvim, file / format */
+    NV_EX, NV_WQ, NV_W, NV_FMT,
+    /* nvim, LSP */
+    NV_GRN, NV_GRD, NV_GRR, NV_GRA,
+    /* vim text objects: ci( ci" ci{ vi( vi{ */
+    NV_CIP, NV_CIQ, NV_CIB, NV_VIP, NV_VIB,
+    /* nvim mini.surround: add around word / delete / replace */
+    NV_SADD, NV_SDEL, NV_SREP,
+
+    /* DEV layer, tmux (prefix C-b), custom binds from .tmux.conf */
+    TM_Y, TM_S, TM_D, TM_R,
+    /* tmux, windows / panes */
+    TM_NEW, TM_KILL, TM_VSPL, TM_HSPL, TM_ZOOM, TM_COPY, TM_NEXT, TM_PREV,
+    /* tmux, pane focus */
+    TM_PL, TM_PD, TM_PU, TM_PR, TM_PNXT,
+    /* tmux, window list / jump / rename */
+    TM_LIST, TM_W1, TM_W2, TM_W3, TM_REN,
 };
+
+#define DEV_FIRST NV_SF
+#define DEV_LAST  TM_REN
 
 /*
  *      ┌───┬───┬───┬───┬───┬───┐       ┌───┬───┬───┬───┬───┬───┐
@@ -49,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LCTL_T(KC_A), KC_S, KC_D, LCTL_T(KC_F), LSFT_T(KC_G),       LSFT_T(KC_H), LCTL_T(KC_J), KC_K, KC_L, RGUI_T(KC_SCLN),
         KC_Z,    KC_X,    KC_C,    LT(_NUMPAD, KC_V), KC_B,       KC_N,    KC_M,    KC_COMM, KC_DOT, KC_SLSH,
         // left thumbs                   right thumbs
-        LT(_NAV, KC_ESC), KC_GRV, KC_PSCR,                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
+        LT(_NAV, KC_ESC), KC_GRV, LT(_DEV, KC_PSCR),                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
         KC_BSPC, LT(_ALT, KC_TAB), KC_DEL,                         LT(_NUMPAD, KC_BSLS), LT(_NAV, KC_ENT), KC_SPC
     ),
 
@@ -92,11 +115,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______,                                   _______, _______, _______
     ),
 
-    [_L5] = LAYOUT(
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
+    /* dev macros, hold left thumb PrtSc. Left = nvim, right = tmux (see custom_keycodes) */
+    [_DEV] = LAYOUT(
+        NV_SF,   NV_SG,   NV_SW,   NV_RR,   NV_SB,   NV_SRES,       TM_Y,    TM_S,    TM_D,    TM_R,    TM_NEW,  TM_KILL,
+        NV_EX,   NV_WQ,   NV_W,    NV_FMT,  NV_GRN,  NV_GRD,        TM_VSPL, TM_HSPL, TM_ZOOM, TM_COPY, TM_NEXT, TM_PREV,
+        NV_CIP,  NV_CIQ,  NV_CIB,  NV_VIP,  NV_VIB,                 TM_PL,   TM_PD,   TM_PU,   TM_PR,   TM_PNXT,
+        NV_SADD, NV_SDEL, NV_SREP, NV_GRR,  NV_GRA,                 TM_LIST, TM_W1,   TM_W2,   TM_W3,   TM_REN,
         _______, _______, _______,                                   _______, _______, _______,
         _______, _______, _______,                                   _______, _______, _______
     ),
@@ -159,6 +183,54 @@ static void set_pulse(uint8_t i) {
     rgb_matrix_set_color(i, c.r, c.g, c.b);
 }
 
+/* Hue per DEV macro group, so nvim/tmux keys are told apart at a glance. */
+static uint8_t dev_hue(uint16_t kc) {
+    switch (kc) {
+        case NV_SF ... NV_SB: case NV_SRES: return 85;   // nvim search - green
+        case NV_EX ... NV_FMT:              return 128;  // nvim file/format - cyan
+        case NV_GRN ... NV_GRA:             return 43;   // nvim LSP - yellow
+        case NV_CIP ... NV_VIB:             return 191;  // vim text objects - purple
+        case NV_SADD ... NV_SREP:           return 213;  // surround - pink
+        case TM_Y ... TM_R:                 return 21;   // tmux custom binds - orange
+        case TM_NEW ... TM_PREV:            return 10;   // tmux windows/splits - red-orange
+        case TM_PL ... TM_PNXT:             return 170;  // tmux pane focus - blue
+        default:                            return 234;  // tmux list/jump/rename - magenta
+    }
+}
+
+/* Fallback hue for layers without a hand-tuned effect. */
+static uint8_t layer_hue(uint8_t layer) {
+    switch (layer) {
+        case _SYM:   return 43;
+        case _MOUSE: return 170;
+        default:     return 0;
+    }
+}
+
+/*
+ * Lights every key that has something assigned on `layer` (anything other than
+ * KC_TRNS/KC_NO), dims the rest. Looks the keycode up by matrix position, so it
+ * keeps working when the LAYOUT or LED order changes.
+ */
+static void light_configured_keys(uint8_t layer, uint8_t led_min, uint8_t led_max) {
+    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+            uint8_t led;
+            if (!rgb_matrix_map_row_column_to_led(row, col, &led) || led < led_min || led >= led_max) {
+                continue;
+            }
+            uint16_t kc = keymap_key_to_keycode(layer, (keypos_t){.row = row, .col = col});
+            if (kc == KC_TRNS || kc == KC_NO) {
+                rgb_matrix_set_color(led, RGB_OFF);
+                continue;
+            }
+            uint8_t hue = (layer == _DEV && kc >= DEV_FIRST && kc <= DEV_LAST) ? dev_hue(kc) : layer_hue(layer);
+            RGB     c   = hsv_to_rgb((HSV){hue, 255, 200});
+            rgb_matrix_set_color(led, c.r, c.g, c.b);
+        }
+    }
+}
+
 /*
  * Per-layer RGB driven purely by LED index (no matrix/keymap lookups).
  * Indices below are the current LAYOUT's LEDs; update them if the keymap moves.
@@ -170,6 +242,9 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     uint8_t layer = get_highest_layer(layer_state);
 
     if (layer != _NUMPAD && layer != _NAV && layer != _ALT) {
+        if (layer != _BASE) {
+            light_configured_keys(layer, led_min, led_max);
+        }
         return true;
     }
 
@@ -262,18 +337,78 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     return true;
 }
 
+/* nvim macros leave insert/visual mode first so they work from anywhere. */
+static void nv(const char *keys) {
+    tap_code(KC_ESC);
+    send_string(keys);
+}
+
+/* tmux prefix is C-b; small gap so tmux sees it as a separate key. */
+static void tm(const char *keys) {
+    tap_code16(C(KC_B));
+    wait_ms(30);
+    send_string(keys);
+}
+
+static void tm_key(uint8_t kc) {
+    tap_code16(C(KC_B));
+    wait_ms(30);
+    tap_code(kc);
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!record->event.pressed) {
+        return !(keycode >= DEV_FIRST && keycode <= DEV_LAST) && keycode != MACRO_0 && keycode != MACRO_2;
+    }
     switch (keycode) {
-        case MACRO_0:
-            if (record->event.pressed) {
-                tap_code16(MEH(KC_X));
-            }
-            return false;
-        case MACRO_2:
-            if (record->event.pressed) {
-                tap_code16(MEH(KC_Z));
-            }
-            return false;
+        case MACRO_0:    tap_code16(MEH(KC_X)); return false;
+        case MACRO_2:    tap_code16(MEH(KC_Z)); return false;
+
+        case NV_SF:      nv(" sf");      return false;  // telescope files
+        case NV_SG:      nv(" sg");      return false;  // live grep
+        case NV_SW:      nv(" sw");      return false;  // grep word under cursor
+        case NV_RR:      nv(" rr");      return false;
+        case NV_SB:      nv("  ");       return false;  // <leader><leader> buffers
+        case NV_SRES:    nv(" sr");      return false;  // resume last search
+        case NV_EX:      nv(":Ex\n");    return false;  // vim netrw
+        case NV_WQ:      nv(":wq\n");    return false;  // vim
+        case NV_W:       nv(":w\n");     return false;  // vim
+        case NV_FMT:     nv(" f");       return false;  // conform format
+        case NV_GRN:     nv("grn");      return false;  // LSP rename
+        case NV_GRD:     nv("grd");      return false;  // LSP definition
+        case NV_GRR:     nv("grr");      return false;  // LSP references
+        case NV_GRA:     nv("gra");      return false;  // LSP code action
+        case NV_CIP:     nv("ci(");      return false;  // vim
+        case NV_CIQ:     nv("ci\"");     return false;  // vim
+        case NV_CIB:     nv("ci{");      return false;  // vim
+        case NV_VIP:     nv("vi(");      return false;  // vim
+        case NV_VIB:     nv("vi{");      return false;  // vim
+        case NV_SADD:    nv("saiw");     return false;  // mini.surround, then type the char
+        case NV_SDEL:    nv("sd");       return false;
+        case NV_SREP:    nv("sr");       return false;
+
+        case TM_Y:       tm("y");        return false;  // tmux_browser.sh
+        case TM_S:       tm("s");        return false;  // session switcher
+        case TM_D:       tm("d");        return false;  // es.sh
+        case TM_R:       tm("r");        return false;  // newfile.sh
+        case TM_NEW:     tm("c");        return false;
+        case TM_KILL:    tm("x");        return false;
+        case TM_VSPL:    tm("%");        return false;
+        case TM_HSPL:    tm("\"");       return false;
+        case TM_ZOOM:    tm("z");        return false;
+        case TM_COPY:    tm("[");        return false;
+        case TM_NEXT:    tm("n");        return false;
+        case TM_PREV:    tm("p");        return false;
+        case TM_PL:      tm_key(KC_LEFT);  return false;
+        case TM_PD:      tm_key(KC_DOWN);  return false;
+        case TM_PU:      tm_key(KC_UP);    return false;
+        case TM_PR:      tm_key(KC_RGHT);  return false;
+        case TM_PNXT:    tm("o");        return false;
+        case TM_LIST:    tm("w");        return false;
+        case TM_W1:      tm("1");        return false;
+        case TM_W2:      tm("2");        return false;
+        case TM_W3:      tm("3");        return false;
+        case TM_REN:     tm(",");        return false;
     }
     return true;
 }
