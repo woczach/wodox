@@ -88,10 +88,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
     /* tmux macros (C-b prefix), tap (one-shot, next key only) or hold left thumb, top row 2nd key. Letters match the tmux key where possible */
     [_TMUX] = LAYOUT(
-        TM_W1,   TM_W2,   TM_W3,   TM_W4,   TM_W5,   _______,       TM_HSPL, _______, _______, _______, _______, _______,
+        TM_W1,   TM_W2,   TM_W3,   TM_W4,   TM_W5,   TM_VSPL,       TM_HSPL, _______, _______, _______, _______, _______,
         _______, TM_LIST, _______, TM_R,    _______, _______,       _______, TM_Y,    _______, _______, TM_PNXT, TM_PREV,
         _______, TM_S,    TM_D,    _______, _______,                TM_PL,   TM_PD,   TM_PU,   TM_PR,   _______,
-        TM_ZOOM, TM_KILL, TM_NEW,  TM_VSPL, _______,                TM_NEXT, _______, TM_REN,  _______, TM_COPY,
+        TM_ZOOM, TM_KILL, TM_NEW,  _______, _______,                TM_NEXT, _______, TM_REN,  _______, TM_COPY,
         _______, _______, _______,                                   _______, _______, _______,
         _______, _______, _______,                                   _______, _______, _______
     ),
@@ -121,8 +121,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______, _______, _______, _______,       _______, KC_PAST, KC_PSLS, KC_PMNS, _______, _______,
         _______, _______, _______, _______, _______, _______,       _______, KC_P7,   KC_P8,   KC_P9,   KC_PPLS, _______,
         _______, _______, _______, _______, _______,                KC_P4,   KC_P5,   KC_P6,   _______, _______,
-        _______, _______, _______, _______, _______,                KC_P1,   KC_P2,   KC_P3,   _______, _______,
-        _______, _______, _______,                                   _______, KC_PENT, _______,
+        _______, _______, _______, _______, _______,                KC_P1,   KC_P2,   KC_P3,   KC_PDOT, _______,
+        _______, _______, _______,                                   _______, _______, KC_P0,
         _______, _______, _______,                                   _______, KC_PDOT, KC_P0
     ),
 

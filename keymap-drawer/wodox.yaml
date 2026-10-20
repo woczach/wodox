@@ -120,7 +120,7 @@ layers:
   - C-b 3
   - TM W4
   - TM W5
-  - {t: ▽, type: trans}
+  - {t: C-b %, s: vsplit}
   - {t: C-b ", s: hsplit}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
@@ -152,7 +152,7 @@ layers:
   - {t: C-b z, s: zoom}
   - {t: C-b x, s: kill pane}
   - {t: C-b c, s: new win}
-  - {t: C-b %, s: vsplit}
+  - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: C-b n, s: next win}
   - {t: ▽, type: trans}
@@ -328,14 +328,14 @@ layers:
   - P1
   - P2
   - P3
+  - PDOT
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
-  - PENT
-  - {t: ▽, type: trans}
+  - P0
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
   - {t: ▽, type: trans}
