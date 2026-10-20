@@ -156,6 +156,7 @@ enum combo_events {
     CB_45_PSCR,
     CB_ER_GRV,
     CB_RT_TILD,
+    CB_YU_SLSH,
 };
 
 const uint16_t PROGMEM cb_ui[]      = {KC_U, KC_I, COMBO_END};
@@ -167,6 +168,7 @@ const uint16_t PROGMEM cb_commdot[] = {KC_COMM, KC_DOT, COMBO_END};
 const uint16_t PROGMEM cb_45[]      = {KC_4, KC_5, COMBO_END};
 const uint16_t PROGMEM cb_er[]      = {KC_E, KC_R, COMBO_END};
 const uint16_t PROGMEM cb_rt[]      = {KC_R, KC_T, COMBO_END};
+const uint16_t PROGMEM cb_yu[]      = {KC_Y, KC_U, COMBO_END};
 
 combo_t key_combos[] = {
     [CB_UI_LPRN]      = COMBO(cb_ui, KC_LPRN),
@@ -178,6 +180,7 @@ combo_t key_combos[] = {
     [CB_45_PSCR]      = COMBO(cb_45, KC_PSCR),
     [CB_ER_GRV]       = COMBO(cb_er, KC_GRV),
     [CB_RT_TILD]      = COMBO(cb_rt, KC_TILD),
+    [CB_YU_SLSH]      = COMBO(cb_yu, KC_SLSH),
 };
 
 /* Breathing brightness, phase-shifted per key. */

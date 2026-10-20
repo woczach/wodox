@@ -409,6 +409,10 @@ path.combo {
 <rect rx="6" ry="6" x="214" y="70" width="28" height="26" class="combo"/>
 <text x="228" y="83" class="combo tap">~</text>
 </g>
+<g class="combo combopos-9">
+<rect rx="6" ry="6" x="675" y="70" width="28" height="26" class="combo"/>
+<text x="689" y="83" class="combo tap">/</text>
+</g>
 </g>
 </g>
 <g transform="translate(30, 409)" class="layer-Numpad">
