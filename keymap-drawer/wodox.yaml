@@ -46,8 +46,8 @@ layers:
   - DOT
   - SLSH
   - {t: ESC, h: Nav}
-  - Tmux
-  - Dev
+  - {t: Tmux, h: sticky}
+  - {t: Dev, h: sticky}
   - HOME
   - END
   - {t: QUOT, h: Nav}

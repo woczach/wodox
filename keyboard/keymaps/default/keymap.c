@@ -72,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LCTL_T(KC_A), KC_S, KC_D, LCTL_T(KC_F), LSFT_T(KC_G),       LSFT_T(KC_H), LCTL_T(KC_J), KC_K, KC_L, RGUI_T(KC_SCLN),
         KC_Z,    KC_X,    KC_C,    LT(_NUMPAD, KC_V), KC_B,       KC_N,    KC_M,    KC_COMM, KC_DOT, KC_SLSH,
         // left thumbs                   right thumbs
-        LT(_NAV, KC_ESC), MO(_TMUX), MO(_DEV),                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
+        LT(_NAV, KC_ESC), OSL(_TMUX), OSL(_DEV),                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
         KC_BSPC, LT(_ALT, KC_TAB), KC_DEL,                         LT(_NUMPAD, KC_BSLS), LT(_NAV, KC_ENT), KC_SPC
     ),
 
@@ -115,7 +115,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______,                                   _______, _______, _______
     ),
 
-    /* nvim macros, hold left thumb, top row 3rd key. Each macro sits on its mnemonic letter. */
+    /* nvim macros, tap (one-shot, next key only) or hold left thumb, top row 3rd key. Each macro sits on its mnemonic letter. */
     [_DEV] = LAYOUT(
         _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
         NV_WQ,   NV_SW,   NV_EX,   NV_RR,   NV_FMT,  _______,       _______, NV_VIB,  NV_VIP,  NV_CIP,  NV_CIQ,  NV_CIB,
@@ -125,7 +125,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______,                                   _______, _______, _______
     ),
 
-    /* tmux macros (C-b prefix), hold left thumb, top row 2nd key. Letters match the tmux key where possible */
+    /* tmux macros (C-b prefix), tap (one-shot, next key only) or hold left thumb, top row 2nd key. Letters match the tmux key where possible */
     [_TMUX] = LAYOUT(
         TM_W1,   TM_W2,   TM_W3,   TM_W4,   TM_W5,   _______,       TM_HSPL, _______, _______, _______, _______, _______,
         _______, TM_LIST, _______, TM_R,    _______, _______,       _______, TM_Y,    _______, _______, TM_PNXT, TM_PREV,
