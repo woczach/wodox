@@ -373,6 +373,30 @@ path.combo {
 <rect rx="6" ry="6" x="-26" y="-26" width="52" height="52" class="key"/>
 <text x="0" y="0" class="key tap">SPC</text>
 </g>
+<g class="combo combopos-0">
+<rect rx="6" ry="6" x="675" y="70" width="28" height="26" class="combo"/>
+<text x="689" y="83" class="combo tap">(</text>
+</g>
+<g class="combo combopos-1">
+<rect rx="6" ry="6" x="734" y="71" width="28" height="26" class="combo"/>
+<text x="748" y="84" class="combo tap">)</text>
+</g>
+<g class="combo combopos-2">
+<rect rx="6" ry="6" x="675" y="120" width="28" height="26" class="combo"/>
+<text x="689" y="133" class="combo tap">[</text>
+</g>
+<g class="combo combopos-3">
+<rect rx="6" ry="6" x="734" y="121" width="28" height="26" class="combo"/>
+<text x="748" y="134" class="combo tap">]</text>
+</g>
+<g class="combo combopos-4">
+<rect rx="6" ry="6" x="675" y="170" width="28" height="26" class="combo"/>
+<text x="689" y="183" class="combo tap">{</text>
+</g>
+<g class="combo combopos-5">
+<rect rx="6" ry="6" x="734" y="171" width="28" height="26" class="combo"/>
+<text x="748" y="184" class="combo tap">}</text>
+</g>
 </g>
 </g>
 <g transform="translate(30, 409)" class="layer-Numpad">
