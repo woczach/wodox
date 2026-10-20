@@ -72,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LCTL_T(KC_A), KC_S, KC_D, LCTL_T(KC_F), LSFT_T(KC_G),       LSFT_T(KC_H), LCTL_T(KC_J), KC_K, KC_L, RGUI_T(KC_SCLN),
         KC_Z,    KC_X,    KC_C,    LT(_NUMPAD, KC_V), KC_B,       KC_N,    KC_M,    KC_COMM, KC_DOT, KC_SLSH,
         // left thumbs                   right thumbs
-        LT(_NAV, KC_ESC), LT(_TMUX, KC_GRV), LT(_DEV, KC_PSCR),                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
+        LT(_NAV, KC_ESC), MO(_TMUX), MO(_DEV),                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
         KC_BSPC, LT(_ALT, KC_TAB), KC_DEL,                         LT(_NUMPAD, KC_BSLS), LT(_NAV, KC_ENT), KC_SPC
     ),
 
@@ -115,7 +115,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______,                                   _______, _______, _______
     ),
 
-    /* nvim macros, hold left thumb PrtSc. Each macro sits on its mnemonic letter. */
+    /* nvim macros, hold left thumb, top row 3rd key. Each macro sits on its mnemonic letter. */
     [_DEV] = LAYOUT(
         _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
         NV_WQ,   NV_SW,   NV_EX,   NV_RR,   NV_FMT,  _______,       _______, NV_VIB,  NV_VIP,  NV_CIP,  NV_CIQ,  NV_CIB,
@@ -125,7 +125,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______,                                   _______, _______, _______
     ),
 
-    /* tmux macros (C-b prefix), hold left thumb `. Letters match the tmux key where possible */
+    /* tmux macros (C-b prefix), hold left thumb, top row 2nd key. Letters match the tmux key where possible */
     [_TMUX] = LAYOUT(
         TM_W1,   TM_W2,   TM_W3,   TM_W4,   TM_W5,   _______,       TM_HSPL, _______, _______, _______, _______, _______,
         _______, TM_LIST, _______, TM_R,    _______, _______,       _______, TM_Y,    _______, _______, TM_PNXT, TM_PREV,
@@ -147,28 +147,37 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 enum combo_events {
-    CB_YU_LPRN,
-    CB_UI_RPRN,
-    CB_HJ_LBRC,
-    CB_JK_RBRC,
-    CB_NM_LCBR,
-    CB_MCOMM_RCBR,
+    CB_UI_LPRN,
+    CB_IO_RPRN,
+    CB_JK_LBRC,
+    CB_KL_RBRC,
+    CB_MCOMM_LCBR,
+    CB_COMMDOT_RCBR,
+    CB_45_PSCR,
+    CB_ER_GRV,
+    CB_RT_TILD,
 };
 
-const uint16_t PROGMEM cb_yu[]    = {KC_Y, KC_U, COMBO_END};
-const uint16_t PROGMEM cb_ui[]    = {KC_U, KC_I, COMBO_END};
-const uint16_t PROGMEM cb_hj[]    = {LSFT_T(KC_H), LCTL_T(KC_J), COMBO_END};
-const uint16_t PROGMEM cb_jk[]    = {LCTL_T(KC_J), KC_K, COMBO_END};
-const uint16_t PROGMEM cb_nm[]    = {KC_N, KC_M, COMBO_END};
-const uint16_t PROGMEM cb_mcomm[] = {KC_M, KC_COMM, COMBO_END};
+const uint16_t PROGMEM cb_ui[]      = {KC_U, KC_I, COMBO_END};
+const uint16_t PROGMEM cb_io[]      = {KC_I, KC_O, COMBO_END};
+const uint16_t PROGMEM cb_jk[]      = {LCTL_T(KC_J), KC_K, COMBO_END};
+const uint16_t PROGMEM cb_kl[]      = {KC_K, KC_L, COMBO_END};
+const uint16_t PROGMEM cb_mcomm[]   = {KC_M, KC_COMM, COMBO_END};
+const uint16_t PROGMEM cb_commdot[] = {KC_COMM, KC_DOT, COMBO_END};
+const uint16_t PROGMEM cb_45[]      = {KC_4, KC_5, COMBO_END};
+const uint16_t PROGMEM cb_er[]      = {KC_E, KC_R, COMBO_END};
+const uint16_t PROGMEM cb_rt[]      = {KC_R, KC_T, COMBO_END};
 
 combo_t key_combos[] = {
-    [CB_YU_LPRN]    = COMBO(cb_yu, KC_LPRN),
-    [CB_UI_RPRN]    = COMBO(cb_ui, KC_RPRN),
-    [CB_HJ_LBRC]    = COMBO(cb_hj, KC_LBRC),
-    [CB_JK_RBRC]    = COMBO(cb_jk, KC_RBRC),
-    [CB_NM_LCBR]    = COMBO(cb_nm, KC_LCBR),
-    [CB_MCOMM_RCBR] = COMBO(cb_mcomm, KC_RCBR),
+    [CB_UI_LPRN]      = COMBO(cb_ui, KC_LPRN),
+    [CB_IO_RPRN]      = COMBO(cb_io, KC_RPRN),
+    [CB_JK_LBRC]      = COMBO(cb_jk, KC_LBRC),
+    [CB_KL_RBRC]      = COMBO(cb_kl, KC_RBRC),
+    [CB_MCOMM_LCBR]   = COMBO(cb_mcomm, KC_LCBR),
+    [CB_COMMDOT_RCBR] = COMBO(cb_commdot, KC_RCBR),
+    [CB_45_PSCR]      = COMBO(cb_45, KC_PSCR),
+    [CB_ER_GRV]       = COMBO(cb_er, KC_GRV),
+    [CB_RT_TILD]      = COMBO(cb_rt, KC_TILD),
 };
 
 /* Breathing brightness, phase-shifted per key. */

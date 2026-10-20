@@ -1,8 +1,11 @@
 # key positions are indices into LAYOUT (row-major, left half then right half per row)
 combos:
-  - {p: [19, 20], k: "(", l: [Base]}
-  - {p: [20, 21], k: ")", l: [Base]}
-  - {p: [29, 30], k: "[", l: [Base]}
-  - {p: [30, 31], k: "]", l: [Base]}
-  - {p: [39, 40], k: "{", l: [Base]}
-  - {p: [40, 41], k: "}", l: [Base]}
+  - {p: [20, 21], k: "(", l: [Base]}
+  - {p: [21, 22], k: ")", l: [Base]}
+  - {p: [30, 31], k: "[", l: [Base]}
+  - {p: [31, 32], k: "]", l: [Base]}
+  - {p: [40, 41], k: "{", l: [Base]}
+  - {p: [41, 42], k: "}", l: [Base]}
+  - {p: [3, 4], k: "PrtSc", l: [Base]}
+  - {p: [14, 15], k: "`", l: [Base]}
+  - {p: [15, 16], k: "~", l: [Base]}
