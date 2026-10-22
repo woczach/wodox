@@ -1,0 +1,61 @@
+draw_config:
+  key_w: 60
+  key_h: 56
+parse_config:
+  layer_legends:
+    - Base
+    - Dev
+    - Tmux
+    - Alt
+    - Nav
+    - Numpad
+    - Sym
+    - Mouse
+  qmk_keycode_map:
+    MACRO_0: {t: "Meh X"}
+    MACRO_2: {t: "Meh Z"}
+    NV_SF: {t: "sf", s: "nvim files"}
+    NV_SG: {t: "sg", s: "nvim grep"}
+    NV_SW: {t: "sw", s: "nvim word"}
+    NV_RR: {t: "rr", s: "nvim"}
+    NV_SB: {t: "bufs", s: "nvim"}
+    NV_SRES: {t: "sr", s: "nvim resume"}
+    NV_EX: {t: ":Ex", s: "vim"}
+    NV_WQ: {t: ":wq", s: "vim"}
+    NV_W: {t: ":w", s: "vim"}
+    NV_QB: {t: ":q!", s: "vim"}
+    NV_FMT: {t: "fmt", s: "nvim"}
+    NV_GRN: {t: "grn", s: "LSP rename"}
+    NV_GRD: {t: "grd", s: "LSP def"}
+    NV_GRR: {t: "grr", s: "LSP refs"}
+    NV_GRA: {t: "gra", s: "LSP action"}
+    NV_CIP: {t: "ci(", s: "vim"}
+    NV_CIQ: {t: "ci\"", s: "vim"}
+    NV_CIB: {t: "ci{", s: "vim"}
+    NV_VIP: {t: "vi(", s: "vim"}
+    NV_VIB: {t: "vi{", s: "vim"}
+    NV_SADD: {t: "sa", s: "surround add"}
+    NV_SDEL: {t: "sd", s: "surround del"}
+    NV_SREP: {t: "sr", s: "surround rep"}
+    TM_Y: {t: "C-b y", s: "browser"}
+    TM_S: {t: "C-b s", s: "sessions"}
+    TM_D: {t: "C-b d", s: "es.sh"}
+    TM_R: {t: "C-b r", s: "newfile"}
+    TM_NEW: {t: "C-b c", s: "new win"}
+    TM_KILL: {t: "C-b x", s: "kill pane"}
+    TM_VSPL: {t: "C-b %", s: "vsplit"}
+    TM_HSPL: {t: "C-b \"", s: "hsplit"}
+    TM_ZOOM: {t: "C-b z", s: "zoom"}
+    TM_COPY: {t: "C-b [", s: "copy mode"}
+    TM_NEXT: {t: "C-b n", s: "next win"}
+    TM_PREV: {t: "C-b p", s: "prev win"}
+    TM_PL: {t: "C-b ←", s: "pane"}
+    TM_PD: {t: "C-b ↓", s: "pane"}
+    TM_PU: {t: "C-b ↑", s: "pane"}
+    TM_PR: {t: "C-b →", s: "pane"}
+    TM_PNXT: {t: "C-b o", s: "next pane"}
+    TM_LIST: {t: "C-b w", s: "win list"}
+    TM_W1: {t: "C-b 1"}
+    TM_W2: {t: "C-b 2"}
+    TM_W3: {t: "C-b 3"}
+    TM_REN: {t: "C-b ,", s: "rename"}

@@ -5,13 +5,13 @@
 
 enum layers {
     _BASE,
+    _DEV,
+    _TMUX,
+    _ALT,
+    _NAV,
     _NUMPAD,
     _SYM,
-    _NAV,
     _MOUSE,
-    _L5,
-    _L6,
-    _ALT,
 };
 
 /*
@@ -22,7 +22,30 @@ enum layers {
 enum custom_keycodes {
     MACRO_0 = SAFE_RANGE,
     MACRO_2,
+
+    /* DEV (nvim) layer, <leader> = space; keys sit on their mnemonic letter. Search group */
+    NV_SF, NV_SG, NV_SW, NV_RR, NV_SB, NV_SRES,
+    /* nvim, file / format */
+    NV_EX, NV_WQ, NV_W, NV_QB, NV_FMT,
+    /* nvim, LSP */
+    NV_GRN, NV_GRD, NV_GRR, NV_GRA,
+    /* vim text objects: ci( ci" ci{ vi( vi{ */
+    NV_CIP, NV_CIQ, NV_CIB, NV_VIP, NV_VIB,
+    /* nvim mini.surround: add around word / delete / replace */
+    NV_SADD, NV_SDEL, NV_SREP,
+
+    /* TMUX layer (prefix C-b), custom binds from .tmux.conf */
+    TM_Y, TM_S, TM_D, TM_R,
+    /* tmux, windows / panes */
+    TM_NEW, TM_KILL, TM_VSPL, TM_HSPL, TM_ZOOM, TM_COPY, TM_NEXT, TM_PREV,
+    /* tmux, pane focus */
+    TM_PL, TM_PD, TM_PU, TM_PR, TM_PNXT,
+    /* tmux, window list / jump / rename */
+    TM_LIST, TM_W1, TM_W2, TM_W3, TM_W4, TM_W5, TM_REN,
 };
+
+#define DEV_FIRST NV_SF
+#define DEV_LAST  TM_REN
 
 /*
  *      ┌───┬───┬───┬───┬───┬───┐       ┌───┬───┬───┬───┬───┬───┐
@@ -49,63 +72,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LCTL_T(KC_A), KC_S, KC_D, LCTL_T(KC_F), LSFT_T(KC_G),       LSFT_T(KC_H), LCTL_T(KC_J), KC_K, KC_L, RGUI_T(KC_SCLN),
         KC_Z,    KC_X,    KC_C,    LT(_NUMPAD, KC_V), KC_B,       KC_N,    KC_M,    KC_COMM, KC_DOT, KC_SLSH,
         // left thumbs                   right thumbs
-        LT(_NAV, KC_ESC), KC_GRV, KC_PSCR,                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
+        LT(_NAV, KC_ESC), OSL(_TMUX), OSL(_DEV),                    KC_HOME,   KC_END,  LT(_NAV, KC_QUOT),
         KC_BSPC, LT(_ALT, KC_TAB), KC_DEL,                         LT(_NUMPAD, KC_BSLS), LT(_NAV, KC_ENT), KC_SPC
     ),
 
-    /* numpad, hold V or toggle with left thumb Num. Left QWERTY keys = RGB controls. */
-    [_NUMPAD] = LAYOUT(
-        _______, _______, _______, _______, _______, _______,       _______, KC_PAST, KC_PSLS, KC_PMNS, _______, _______,
-        RM_TOGG, RM_NEXT, RM_PREV, RM_HUEU, RM_HUED, RM_SATU,       _______, KC_P7,   KC_P8,   KC_P9,   KC_PPLS, _______,
-        RM_SATD, RM_VALU, RM_VALD, RM_SPDU, RM_SPDD,                KC_P4,   KC_P5,   KC_P6,   _______, _______,
-        RGB_M_P, RGB_M_B, RGB_M_R, _______, RGB_M_G,                KC_P1,   KC_P2,   KC_P3,   _______, _______,
-        _______, _______, _______,                                   _______, KC_PENT, _______,
-        _______, _______, _______,                                   _______, KC_PDOT, KC_P0
-    ),
-
-    [_SYM] = LAYOUT(
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
+    /* nvim macros, tap (one-shot, next key only) or hold left thumb, top row 3rd key. Each macro sits on its mnemonic letter. */
+    [_DEV] = LAYOUT(
+        _______, _______, _______, _______, NV_WQ,   _______,       _______, _______, _______, _______, _______, _______,
+        NV_QB,   NV_SW,   NV_EX,   NV_RR,   NV_FMT,  _______,       _______, NV_VIB,  NV_VIP,  NV_CIP,  NV_CIQ,  NV_CIB,
+        NV_SADD, NV_SRES, NV_GRD,  NV_SF,   NV_SG,                  _______, _______, _______, _______, _______,
+        NV_W,    NV_SDEL, NV_SREP, _______, NV_SB,                  NV_GRN,  NV_GRR,  NV_GRA,  _______, _______,
         _______, _______, _______,                                   _______, _______, _______,
         _______, _______, _______,                                   _______, _______, _______
     ),
 
-    /* navigation / F-keys, hold left thumb Esc */
-    [_NAV] = LAYOUT(
-        KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,  _______,	 _______, KC_F6, KC_F7,   KC_F8,   KC_F9,   KC_F10,
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, KC_F11,
-        _______, _______, _______, _______, _______,                KC_LEFT, KC_DOWN, KC_UP, KC_RGHT, KC_F12,
-        MACRO_2, MACRO_0, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, _______, KC_HOME,                                   KC_VOLU, KC_VOLD,_______,
-        _______,_______,_______,				     _______,_______,_______
-    ),
-
-    /* mouse, hold S */
-    [_MOUSE] = LAYOUT(
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,       _______, _______, MS_BTN1, MS_UP,   MS_BTN2, _______,
-        _______, _______, _______, _______, _______,                _______, MS_LEFT, MS_DOWN, MS_RGHT, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, _______, _______,                                   _______, _______, _______,
-        _______, _______, _______,                                   _______, _______, _______
-    ),
-
-    [_L5] = LAYOUT(
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, _______, _______,                                   _______, _______, _______,
-        _______, _______, _______,                                   _______, _______, _______
-    ),
-
-    [_L6] = LAYOUT(
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
-        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
+    /* tmux macros (C-b prefix), tap (one-shot, next key only) or hold left thumb, top row 2nd key. Letters match the tmux key where possible */
+    [_TMUX] = LAYOUT(
+        TM_W1,   TM_W2,   TM_W3,   TM_W4,   TM_W5,   TM_VSPL,       TM_HSPL, _______, _______, _______, _______, _______,
+        _______, TM_LIST, _______, TM_R,    _______, _______,       _______, TM_Y,    _______, _______, TM_PNXT, TM_PREV,
+        _______, TM_S,    TM_D,    _______, _______,                TM_PL,   TM_PD,   TM_PU,   TM_PR,   _______,
+        TM_ZOOM, TM_KILL, TM_NEW,  _______, _______,                TM_NEXT, _______, TM_REN,  _______, TM_COPY,
         _______, _______, _______,                                   _______, _______, _______,
         _______, _______, _______,                                   _______, _______, _______
     ),
@@ -119,31 +105,82 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, _______, _______,                                              LALT(KC_UP), LALT(KC_RGHT), _______,
         _______, _______, _______,                                              LALT(KC_DOWN), _______, LALT(KC_LEFT)
     ),
+
+    /* navigation / F-keys, hold left thumb Esc */
+    [_NAV] = LAYOUT(
+        KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,  _______,	 _______, KC_F6, KC_F7,   KC_F8,   KC_F9,   KC_F10,
+        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, KC_F11,
+        _______, _______, _______, _______, _______,                KC_LEFT, KC_DOWN, KC_UP, KC_RGHT, KC_F12,
+        MACRO_2, MACRO_0, _______, _______, _______,                _______, _______, _______, _______, _______,
+        _______, _______, KC_HOME,                                   KC_VOLU, KC_VOLD,_______,
+        _______,_______,_______,				     _______,_______,_______
+    ),
+
+    /* numpad, hold V or toggle with left thumb Num. Left QWERTY keys = RGB controls. */
+    [_NUMPAD] = LAYOUT(
+        _______, _______, _______, _______, _______, _______,       _______, KC_PAST, KC_PSLS, KC_PMNS, _______, _______,
+        RM_TOGG, RM_NEXT, RM_PREV, RM_HUEU, RM_HUED, RM_SATU,       _______, KC_P7,   KC_P8,   KC_P9,   KC_PPLS, _______,
+        RM_SATD, RM_VALU, RM_VALD, RM_SPDU, RM_SPDD,                KC_P4,   KC_P5,   KC_P6,   _______, _______,
+        RGB_M_P, RGB_M_B, RGB_M_R, _______, RGB_M_G,                KC_P1,   KC_P2,   KC_P3,   KC_PDOT, _______,
+        _______, _______, _______,                                   _______, _______, KC_P0,
+        _______, _______, _______,                                   _______, KC_PDOT, KC_P0
+    ),
+
+    [_SYM] = LAYOUT(
+        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
+        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
+        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
+        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
+        _______, _______, _______,                                   _______, _______, _______,
+        _______, _______, _______,                                   _______, _______, _______
+    ),
+
+    /* mouse, hold S */
+    [_MOUSE] = LAYOUT(
+        _______, _______, _______, _______, _______, _______,       _______, _______, _______, _______, _______, _______,
+        _______, _______, _______, _______, _______, _______,       _______, _______, MS_BTN1, MS_UP,   MS_BTN2, _______,
+        _______, _______, _______, _______, _______,                _______, MS_LEFT, MS_DOWN, MS_RGHT, _______,
+        _______, _______, _______, _______, _______,                _______, _______, _______, _______, _______,
+        _______, _______, _______,                                   _______, _______, _______,
+        _______, _______, _______,                                   _______, _______, _______
+    ),
 };
 
 enum combo_events {
-    CB_YU_LPRN,
-    CB_UI_RPRN,
-    CB_HJ_LBRC,
-    CB_JK_RBRC,
-    CB_NM_LCBR,
-    CB_MCOMM_RCBR,
+    CB_UI_LPRN,
+    CB_IO_RPRN,
+    CB_JK_LBRC,
+    CB_KL_RBRC,
+    CB_MCOMM_LCBR,
+    CB_COMMDOT_RCBR,
+    CB_45_PSCR,
+    CB_ER_GRV,
+    CB_RT_TILD,
+    CB_YU_SLSH,
 };
 
-const uint16_t PROGMEM cb_yu[]    = {KC_Y, KC_U, COMBO_END};
-const uint16_t PROGMEM cb_ui[]    = {KC_U, KC_I, COMBO_END};
-const uint16_t PROGMEM cb_hj[]    = {LSFT_T(KC_H), LCTL_T(KC_J), COMBO_END};
-const uint16_t PROGMEM cb_jk[]    = {LCTL_T(KC_J), KC_K, COMBO_END};
-const uint16_t PROGMEM cb_nm[]    = {KC_N, KC_M, COMBO_END};
-const uint16_t PROGMEM cb_mcomm[] = {KC_M, KC_COMM, COMBO_END};
+const uint16_t PROGMEM cb_ui[]      = {KC_U, KC_I, COMBO_END};
+const uint16_t PROGMEM cb_io[]      = {KC_I, KC_O, COMBO_END};
+const uint16_t PROGMEM cb_jk[]      = {LCTL_T(KC_J), KC_K, COMBO_END};
+const uint16_t PROGMEM cb_kl[]      = {KC_K, KC_L, COMBO_END};
+const uint16_t PROGMEM cb_mcomm[]   = {KC_M, KC_COMM, COMBO_END};
+const uint16_t PROGMEM cb_commdot[] = {KC_COMM, KC_DOT, COMBO_END};
+const uint16_t PROGMEM cb_45[]      = {KC_4, KC_5, COMBO_END};
+const uint16_t PROGMEM cb_er[]      = {KC_E, KC_R, COMBO_END};
+const uint16_t PROGMEM cb_rt[]      = {KC_R, KC_T, COMBO_END};
+const uint16_t PROGMEM cb_yu[]      = {KC_Y, KC_U, COMBO_END};
 
 combo_t key_combos[] = {
-    [CB_YU_LPRN]    = COMBO(cb_yu, KC_LPRN),
-    [CB_UI_RPRN]    = COMBO(cb_ui, KC_RPRN),
-    [CB_HJ_LBRC]    = COMBO(cb_hj, KC_LBRC),
-    [CB_JK_RBRC]    = COMBO(cb_jk, KC_RBRC),
-    [CB_NM_LCBR]    = COMBO(cb_nm, KC_LCBR),
-    [CB_MCOMM_RCBR] = COMBO(cb_mcomm, KC_RCBR),
+    [CB_UI_LPRN]      = COMBO(cb_ui, KC_LPRN),
+    [CB_IO_RPRN]      = COMBO(cb_io, KC_RPRN),
+    [CB_JK_LBRC]      = COMBO(cb_jk, KC_LBRC),
+    [CB_KL_RBRC]      = COMBO(cb_kl, KC_RBRC),
+    [CB_MCOMM_LCBR]   = COMBO(cb_mcomm, KC_LCBR),
+    [CB_COMMDOT_RCBR] = COMBO(cb_commdot, KC_RCBR),
+    [CB_45_PSCR]      = COMBO(cb_45, KC_PSCR),
+    [CB_ER_GRV]       = COMBO(cb_er, KC_GRV),
+    [CB_RT_TILD]      = COMBO(cb_rt, KC_TILD),
+    [CB_YU_SLSH]      = COMBO(cb_yu, KC_SLSH),
 };
 
 /*
@@ -175,10 +212,60 @@ static void set_hue_solid(uint8_t i, uint8_t hue) {
     rgb_matrix_set_color(i, c.r, c.g, c.b);
 }
 
+/* Hue per DEV/TMUX macro group, so nvim/tmux keys are told apart at a glance. */
+static uint8_t dev_hue(uint16_t kc) {
+    switch (kc) {
+        case NV_SF ... NV_SB: case NV_SRES: return 85;   // nvim search - green
+        case NV_EX ... NV_FMT:              return 128;  // nvim file/format - cyan
+        case NV_GRN ... NV_GRA:             return 43;   // nvim LSP - yellow
+        case NV_CIP ... NV_VIB:             return 191;  // vim text objects - purple
+        case NV_SADD ... NV_SREP:           return 213;  // surround - pink
+        case TM_Y ... TM_R:                 return 21;   // tmux custom binds - orange
+        case TM_NEW ... TM_PREV:            return 10;   // tmux windows/splits - red-orange
+        case TM_PL ... TM_PNXT:             return 170;  // tmux pane focus - blue
+        default:                            return 234;  // tmux list/jump/rename - magenta
+    }
+}
+
+/* Fallback hue for layers without a hand-tuned effect. */
+static uint8_t layer_hue(uint8_t layer) {
+    switch (layer) {
+        case _SYM:   return 43;
+        case _MOUSE: return 170;
+        default:     return 0;
+    }
+}
+
+/*
+ * Lights every key that has something assigned on `layer` (anything other than
+ * KC_TRNS/KC_NO), dims the rest. Looks the keycode up by matrix position, so it
+ * keeps working when the LAYOUT or LED order changes.
+ */
+static void light_configured_keys(uint8_t layer, uint8_t led_min, uint8_t led_max) {
+    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
+        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+            uint8_t led;
+            if (!rgb_matrix_map_row_column_to_led(row, col, &led) || led < led_min || led >= led_max) {
+                continue;
+            }
+            uint16_t kc = keymap_key_to_keycode(layer, (keypos_t){.row = row, .col = col});
+            if (kc == KC_TRNS || kc == KC_NO) {
+                rgb_matrix_set_color(led, RGB_OFF);
+                continue;
+            }
+            uint8_t hue = ((layer == _DEV || layer == _TMUX) && kc >= DEV_FIRST && kc <= DEV_LAST) ? dev_hue(kc) : layer_hue(layer);
+            /* honor the global RGB hue/sat/brightness keys, like the other layers */
+            RGB     c   = hsv_to_rgb((HSV){(uint8_t)(hue + rgb_matrix_config.hsv.h), rgb_matrix_config.hsv.s, (uint8_t)(200 * (uint16_t)rgb_matrix_config.hsv.v / 255)});
+            rgb_matrix_set_color(led, c.r, c.g, c.b);
+        }
+    }
+}
+
 /*
  * Per-layer RGB driven purely by LED index (no matrix/keymap lookups).
  * Indices below are the current LAYOUT's LEDs; update them if the keymap moves.
- *   NUMPAD: numbers rainbow-breathe, * red, + orange, - green, / blue, . yellow
+ *   NUMPAD: numbers rainbow-breathe, * red, + orange, - green, / blue, . yellow,
+ *           left-hand RGB controls grouped by color
  *   NAV:    F-keys rainbow-breathe, arrows green->red, other keys tinted
  *   ALT:    only the keys on the layer glow (rainbow breathe)
  */
@@ -186,6 +273,9 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     uint8_t layer = get_highest_layer(layer_state);
 
     if (layer != _NUMPAD && layer != _NAV && layer != _ALT) {
+        if (layer != _BASE) {
+            light_configured_keys(layer, led_min, led_max);
+        }
         return true;
     }
 
@@ -204,14 +294,36 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
                 case 31:  // /
                     set_solid(i, RGB_BLUE);
                     break;
-                case 46:  // .
+                case 46: case 54:  // .
                     set_solid(i, RGB_YELLOW);
                     break;
                 case 51: case 52: case 53:  // 1 2 3
                 case 43: case 42: case 41:  // 4 5 6
                 case 34: case 35: case 36:  // 7 8 9
-                case 45:                    // 0
+                case 45: case 50:           // 0
                     set_pulse(i);
+                    break;
+                /* left-hand RGB controls */
+                case 10:  // toggle
+                    set_solid(i, RGB_WHITE);
+                    break;
+                case 9: case 8:  // next / prev effect
+                    set_solid(i, RGB_CYAN);
+                    break;
+                case 7: case 6:  // hue +/-
+                    set_pulse(i);
+                    break;
+                case 16: case 11:  // sat +/-
+                    set_solid(i, RGB_MAGENTA);
+                    break;
+                case 12: case 13:  // val +/-
+                    set_solid(i, RGB_ORANGE);
+                    break;
+                case 14: case 15:  // speed +/-
+                    set_solid(i, RGB_YELLOW);
+                    break;
+                case 27: case 26: case 25: case 23:  // effect presets
+                    set_solid(i, RGB_PURPLE);
                     break;
                 default:
                     rgb_matrix_set_color(i, RGB_BLACK);
@@ -270,18 +382,81 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     return true;
 }
 
+/* nvim macros leave insert/visual mode first so they work from anywhere. */
+static void nv(const char *keys) {
+    tap_code(KC_ESC);
+    send_string(keys);
+}
+
+/* tmux prefix is C-b; small gap so tmux sees it as a separate key. */
+static void tm(const char *keys) {
+    tap_code16(C(KC_B));
+    wait_ms(30);
+    send_string(keys);
+}
+
+static void tm_key(uint8_t kc) {
+    tap_code16(C(KC_B));
+    wait_ms(30);
+    tap_code(kc);
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!record->event.pressed) {
+        return !(keycode >= DEV_FIRST && keycode <= DEV_LAST) && keycode != MACRO_0 && keycode != MACRO_2;
+    }
     switch (keycode) {
-        case MACRO_0:
-            if (record->event.pressed) {
-                tap_code16(MEH(KC_X));
-            }
-            return false;
-        case MACRO_2:
-            if (record->event.pressed) {
-                tap_code16(MEH(KC_Z));
-            }
-            return false;
+        case MACRO_0:    tap_code16(MEH(KC_X)); return false;
+        case MACRO_2:    tap_code16(MEH(KC_Z)); return false;
+
+        case NV_SF:      nv(" sf");      return false;  // telescope files
+        case NV_SG:      nv(" sg");      return false;  // live grep
+        case NV_SW:      nv(" sw");      return false;  // grep word under cursor
+        case NV_RR:      nv(" rr");      return false;
+        case NV_SB:      nv("  ");       return false;  // <leader><leader> buffers
+        case NV_SRES:    nv(" sr");      return false;  // resume last search
+        case NV_EX:      nv(":Ex\n");    return false;  // vim netrw
+        case NV_WQ:      nv(":wq\n");    return false;  // vim
+        case NV_W:       nv(":w\n");     return false;  // vim
+        case NV_QB:      nv(":q!\n");    return false;  // vim, quit discarding changes
+        case NV_FMT:     nv(" f");       return false;  // conform format
+        case NV_GRN:     nv("grn");      return false;  // LSP rename
+        case NV_GRD:     nv("grd");      return false;  // LSP definition
+        case NV_GRR:     nv("grr");      return false;  // LSP references
+        case NV_GRA:     nv("gra");      return false;  // LSP code action
+        case NV_CIP:     nv("ci(");      return false;  // vim
+        case NV_CIQ:     nv("ci\"");     return false;  // vim
+        case NV_CIB:     nv("ci{");      return false;  // vim
+        case NV_VIP:     nv("vi(");      return false;  // vim
+        case NV_VIB:     nv("vi{");      return false;  // vim
+        case NV_SADD:    nv("saiw");     return false;  // mini.surround, then type the char
+        case NV_SDEL:    nv("sd");       return false;
+        case NV_SREP:    nv("sr");       return false;
+
+        case TM_Y:       tm("y");        return false;  // tmux_browser.sh
+        case TM_S:       tm("s");        return false;  // session switcher
+        case TM_D:       tm("d");        return false;  // es.sh
+        case TM_R:       tm("r");        return false;  // newfile.sh
+        case TM_NEW:     tm("c");        return false;
+        case TM_KILL:    tm("x");        return false;
+        case TM_VSPL:    tm("%");        return false;
+        case TM_HSPL:    tm("\"");       return false;
+        case TM_ZOOM:    tm("z");        return false;
+        case TM_COPY:    tm("[");        return false;
+        case TM_NEXT:    tm("n");        return false;
+        case TM_PREV:    tm("p");        return false;
+        case TM_PL:      tm_key(KC_LEFT);  return false;
+        case TM_PD:      tm_key(KC_DOWN);  return false;
+        case TM_PU:      tm_key(KC_UP);    return false;
+        case TM_PR:      tm_key(KC_RGHT);  return false;
+        case TM_PNXT:    tm("o");        return false;
+        case TM_LIST:    tm("w");        return false;
+        case TM_W1:      tm("1");        return false;
+        case TM_W2:      tm("2");        return false;
+        case TM_W3:      tm("3");        return false;
+        case TM_W4:      tm("4");        return false;
+        case TM_W5:      tm("5");        return false;
+        case TM_REN:     tm(",");        return false;
     }
     return true;
 }
