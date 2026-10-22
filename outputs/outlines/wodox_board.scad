@@ -21,8 +21,8 @@ PJ320E_ROT = -90;                   // KiCad footprint rotation (deg)
 
 // Split: the second half is a mirror of the first, placed to the right
 SPLIT_GAP  = 30;                    // gap between the two halves (mm)
-HALF_ROT   = 10;                    // rotate each half inward (deg)
-HALF_TILT  = 10;                    // tilt each half towards the front (deg)
+HALF_ROT   = -15;                   // rotate each half inward (deg)
+HALF_TILT  = 6;                     // tilt each half about the two bottom screws (deg)
 
 // Bottom plate: same outline as the board, solid (no switch cutouts)
 PLATE_THICKNESS = 3;                // plate thickness (mm)
@@ -64,13 +64,16 @@ SCREW_BOSS_WALL = 2;                // wall around each screw / barrel (mm)
 // Screw centres, on the ring mid-line (SCAD coords). One half; mirrored with it.
 // Offsets set so each screw's barrel (OD M3_INSERT_D+2*SCREW_BOSS_WALL) has
 // its inner edge on the board outline -> not inside the plates.
+// The two bottom screws define the single tilt axis (see half_transform).
+SCREW_BOTTOM_LEFT  = [  3.11,  25.22];
+SCREW_BOTTOM_RIGHT = [148.48,  -4.20];
 screws = [
   [ 41.50, 132.96],   // top
   [ 104.00, 120.23],   // top (near jack)
   [167.75,  37.31],   // right / thumb
-  [148.48,  -4.20],   // bottom-right
+  SCREW_BOTTOM_RIGHT,  // bottom-right
   [ 88.33,  31.04],   // bottom-middle
-  [  3.11,  25.22],   // bottom-left
+  SCREW_BOTTOM_LEFT,   // bottom-left
   [120.26,  99.44],   // upper-right corner
   [ -4.20,  85.00],   // left-upper
   [ 18.61, 129.90],   // top-left
@@ -321,9 +324,41 @@ BOARD_W = _max_x(outer);        // width of one half (board starts at x=0)
 BOARD_H = _max_y(outer);        // depth of one half (board starts at y=0)
 ZBED    = -PLATE_GAP - PLATE_THICKNESS;
 
-// Pitch pivot: front-most bottom edge, so nothing dips below the desk.
 BOT_BOSS_R = M3_INSERT_D/2 + SCREW_BOSS_WALL;
-PIVOT_Y    = min(-OUTLINE, min([for (s = screws) s[1] - BOT_BOSS_R]));
+
+// Single tilt axis: the line through the two bottom screws, at the underside
+// of the bottom plate. Positive HALF_TILT lifts the back of the half.
+TILT_A   = [SCREW_BOTTOM_LEFT[0],  SCREW_BOTTOM_LEFT[1],  ZBED];
+TILT_B   = [SCREW_BOTTOM_RIGHT[0], SCREW_BOTTOM_RIGHT[1], ZBED];
+TILT_PHI = atan2(TILT_B[1] - TILT_A[1], TILT_B[0] - TILT_A[0]);
+
+function _rot_z(p, a) = [
+    p[0]*cos(a) - p[1]*sin(a),
+    p[0]*sin(a) + p[1]*cos(a),
+    p[2]
+];
+function _rot_x(p, a) = [
+    p[0],
+    p[1]*cos(a) - p[2]*sin(a),
+    p[1]*sin(a) + p[2]*cos(a)
+];
+// Height of a point on the bottom plane after tilting about the screw axis.
+function tilt_z(x, y, a) =
+    let(p0 = [x - TILT_A[0], y - TILT_A[1], 0],
+        p1 = _rot_z(p0, -TILT_PHI),
+        p2 = _rot_x(p1, a),
+        p3 = _rot_z(p2, TILT_PHI))
+    ZBED + p3[2];
+
+// Lift the tilted half so its lowest point (outline or screw boss) sits on the
+// bed; the wedge below then fills the gap.
+TILT_SLOPE = abs(sin(HALF_TILT));
+TILT_EDGE  = OUTLINE + PCB_CLEARANCE;
+TILT_MIN_Z = min(
+    min([for (p = outer) tilt_z(p[0], p[1], HALF_TILT)]) - TILT_EDGE*TILT_SLOPE,
+    min([for (s = screws) tilt_z(s[0], s[1], HALF_TILT) - BOT_BOSS_R*TILT_SLOPE])
+);
+TILT_LIFT = max(0, ZBED - TILT_MIN_Z);
 
 // Touchpad base placement: same bed plane as the printed boards, centred in
 // the split. The right half is pushed out by the base width when enabled.
@@ -361,14 +396,22 @@ module bottom_footprint_2d() {
     }
 }
 
+module tilt_axis_rotate(a) {
+    translate(TILT_A)
+        rotate([0, 0, TILT_PHI])
+            rotate([a, 0, 0])
+                rotate([0, 0, -TILT_PHI])
+                    translate(-TILT_A)
+                        children();
+}
+
 module half_inverse(yaw) {
-    translate([0, PIVOT_Y, ZBED])
-        rotate([-HALF_TILT, 0, 0])
-            translate([0, -PIVOT_Y, -ZBED])
-                translate([BOARD_W/2, BOARD_H/2, 0])
-                    rotate([0, 0, -yaw])
-                        translate([-BOARD_W/2, -BOARD_H/2, 0])
-                            children();
+    tilt_axis_rotate(-HALF_TILT)
+        translate([0, 0, -TILT_LIFT])
+            translate([BOARD_W/2, BOARD_H/2, 0])
+                rotate([0, 0, -yaw])
+                    translate([-BOARD_W/2, -BOARD_H/2, 0])
+                        children();
 }
 
 module bottom_wedge_local(yaw) {
@@ -399,15 +442,15 @@ module bottom_part_with_wedge(yaw) {
 PART = "all";    // "all" | "top" | "bottom" | "touchpad"
 SIDE = "both";   // "both" | "left" | "right"
 
-// Yaw about the half centre, then pitch about the front-most bottom edge.
+// Yaw about the half centre, then one tilt about the line through the two
+// bottom screws. The half is lifted so nothing dips below the bed.
 module half_transform(yaw) {
-    translate([BOARD_W/2, BOARD_H/2, 0])
-        rotate([0, 0, yaw])
-            translate([-BOARD_W/2, -BOARD_H/2, 0])
-                translate([0, PIVOT_Y, ZBED])
-                    rotate([HALF_TILT, 0, 0])
-                        translate([0, -PIVOT_Y, -ZBED])
-                            children();
+    translate([0, 0, TILT_LIFT])
+        translate([BOARD_W/2, BOARD_H/2, 0])
+            rotate([0, 0, yaw])
+                translate([-BOARD_W/2, -BOARD_H/2, 0])
+                    tilt_axis_rotate(HALF_TILT)
+                        children();
 }
 
 module selected_parts() {
@@ -424,11 +467,20 @@ module right_half_placed() {
         half_transform(HALF_ROT) selected_parts();
 }
 
+// Lift single printable parts so their lowest point sits on z=0.
+// The top part is offset from the bottom plane by -ZBED, and the tilt lowers
+// its lowest edge by that distance times (1 - cos(HALF_TILT)).
+BED_LIFT =
+    (PART == "bottom" || PART == "touchpad") ? -ZBED :
+    (PART == "top") ? -ZBED*(1 - cos(HALF_TILT)) : 0;
+
 module selected() {
-    if (SIDE == "left" || SIDE == "both") left_half_placed();
-    if (SIDE == "right" || SIDE == "both") right_half_placed();
-    if (TOUCHPAD && (PART == "touchpad" || (PART == "all" && SIDE == "both")))
-        touchpad_placed();
+    translate([0, 0, BED_LIFT]) {
+        if (SIDE == "left" || SIDE == "both") left_half_placed();
+        if (SIDE == "right" || SIDE == "both") right_half_placed();
+        if (TOUCHPAD && (PART == "touchpad" || (PART == "all" && SIDE == "both")))
+            touchpad_placed();
+    }
 }
 selected();
 
