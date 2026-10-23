@@ -440,7 +440,8 @@ TP_RIGHT_X0 = TP_LEFT_X0 + TP_OUTER_W;
 TP_RIGHT_X  = TP_LEFT_X + TP_OUTER_W;
 TP_CENTER_X = TP_LEFT_X + TP_OUTER_W/2;
 TP_Y_POS    = TP_TALL_WALL == "front" ? TP_FRONT_Y + TP_YMAX : TP_FRONT_Y - TP_YMIN;
-RIGHT_OFFSET = TOUCHPAD ? 2*TP_LEFT_X + TP_OUTER_W : 2*BOARD_W + GAP;
+RIGHT_OFFSET0 = TOUCHPAD ? 2*TP_LEFT_X0 + TP_OUTER_W : 2*BOARD_W;
+RIGHT_OFFSET  = TOUCHPAD ? RIGHT_OFFSET0 + 2*GAP : 2*BOARD_W + GAP;
 
 // Joinery: the keyboard halves have bottom lips that slide into pockets cut
 // into the touchpad base from below. The screws go up from under the lips into
@@ -544,6 +545,13 @@ module touchpad_placed() {
             touchpad_base();
         touchpad_mount_cutouts();
         touchpad_finger_cutouts();
+        // Never cross the PCB "outer" polygons. Shifted with the touchpad so
+        // the part keeps the same shape at any print GAP.
+        translate([GAP, 0, 0])
+            pcb_footprint_world();
+        translate([GAP, 0, 0])
+            translate([RIGHT_OFFSET0, 0, 0]) mirror([1,0,0])
+                pcb_footprint_world();
     }
 }
 
@@ -555,6 +563,15 @@ module touchpad_footprint_world() {
             translate([TP_LEFT_X0, TP_FRONT_Y])
                 square([TP_RIGHT_X0 - TP_LEFT_X0,
                         (TP_Y_POS + TP_YMAX) - TP_FRONT_Y]);
+}
+
+// Left PCB footprint at GAP=0, used to notch the touchpad so it never crosses
+// the board outline (only the printed outline may overlap).
+module pcb_footprint_world() {
+    translate([0, 0, -1000])
+        linear_extrude(height = 2000)
+            offset(delta = PCB_CLEARANCE)
+                polygon([for (p = outer) _half_xy(p)]);
 }
 
 // --- Tilted bottom wedge ----------------------------------------------------
