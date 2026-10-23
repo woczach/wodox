@@ -27,13 +27,12 @@ JACK_INNER_Y  = 2.1;                // jack body inner face (local y)
 JACK_OUTER_Y  = PJ320E_POS[0] - (JACK_PCB_EDGE + JACK_EXT);
 
 // Split: the second half is a mirror of the first, placed to the right
-SPLIT_GAP  = 30;                    // gap between the two halves (mm)
+GAP        = 0;                    // single layout gap, all elements (0 = touching)
 HALF_ROT   = -15;                   // rotate each half inward (deg)
 HALF_TILT  = 6;                     // tilt each half about the two bottom screws (deg)
 
 // Bottom plate: same outline as the board, solid (no switch cutouts)
 PLATE_THICKNESS = 3;                // plate thickness (mm)
-PLATE_GAP       = 30;               // gap between top plate and bottom plate (mm)
 
 // Touchpad base (from ~/git/other/tuchpad base.scad)
 // The source is Y-up: the flat touchpad face points towards +Y, the slanted
@@ -76,11 +75,11 @@ SCREW_BOTTOM_LEFT  = [  3.11,  25.22];
 SCREW_BOTTOM_RIGHT = [148.48,  -4.20];
 screws = [
   [ 41.50, 132.96],   // top
-  [167.75,  37.31],   // right / thumb
+ // [167.75,  37.31],   // right / thumb
   SCREW_BOTTOM_RIGHT,  // bottom-right
-  [ 88.33,  31.04],   // bottom-middle
+  //[ 88.33,  31.04],   // bottom-middle
   SCREW_BOTTOM_LEFT,   // bottom-left
-  [120.26,  99.44],   // upper-right corner
+  //[120.26,  99.44],   // upper-right corner
   [ -4.20,  85.00],   // left-upper
   [ 18.61, 129.90],   // top-left
 ];
@@ -190,8 +189,8 @@ module pj320e_2d() {            // 3.5mm jack slot: 1 cm plug, 1 cm past PCB
 // RP2040 + USB + jack punched through the full stack (bottom plate -> top plate).
 // `below` extends the cut downwards, e.g. through the solid tilted base.
 module component_cutouts(below = 0) {
-    translate([0, 0, -PLATE_GAP - PLATE_THICKNESS - below])
-      linear_extrude(height = BOARD_THICKNESS + PLATE_GAP + PLATE_THICKNESS + 2 + below) {
+    translate([0, 0, -GAP - PLATE_THICKNESS - below])
+      linear_extrude(height = BOARD_THICKNESS + GAP + PLATE_THICKNESS + 2 + below) {
           rp2040_body_2d();
           rp2040_usb_2d();
           pj320e_2d();
@@ -199,8 +198,8 @@ module component_cutouts(below = 0) {
 }
 
 // bottom plate: board outline only, solid (no switch cutouts),
-// sitting PLATE_GAP below the top plate
-module bottom_plate(t=PLATE_THICKNESS, gap=PLATE_GAP) {
+// sitting GAP below the top plate
+module bottom_plate(t=PLATE_THICKNESS, gap=GAP) {
     translate([0, 0, -gap - t]) linear_extrude(height=t) board_2d();
 }
 
@@ -223,7 +222,7 @@ module top_screw_holes() {
 
 // M3 heat-set insert holes in the bottom outline (blind, from its top face)
 module bottom_insert_holes() {
-    ztop = -PLATE_GAP - PLATE_THICKNESS + BOT_OUTLINE_H;   // top of bottom outline
+    ztop = -GAP - PLATE_THICKNESS + BOT_OUTLINE_H;   // top of bottom outline
     for (s=screws)
         translate([s[0], s[1], ztop - M3_INSERT_H])
             cylinder(d=M3_INSERT_D, h=M3_INSERT_H+1, $fn=48);
@@ -240,7 +239,7 @@ module screw_bosses_top() {
 module screw_bosses_bottom() {
     d = M3_INSERT_D + 2*SCREW_BOSS_WALL;
     for (s=screws)
-        translate([s[0], s[1], -PLATE_GAP - PLATE_THICKNESS])
+        translate([s[0], s[1], -GAP - PLATE_THICKNESS])
             cylinder(d=d, h=BOT_OUTLINE_H, $fn=48);
 }
 
@@ -262,7 +261,7 @@ module bottom_part() {
     difference() {
         union() {
             bottom_plate();
-            plate_outline(BOT_OUTLINE_H, -PLATE_GAP - PLATE_THICKNESS);
+            plate_outline(BOT_OUTLINE_H, -GAP - PLATE_THICKNESS);
             screw_bosses_bottom();
         }
         component_cutouts();
@@ -344,7 +343,7 @@ function _max_y(p, i=0, m=-1e9) =
 
 BOARD_W = _max_x(outer);        // width of one half (board starts at x=0)
 BOARD_H = _max_y(outer);        // depth of one half (board starts at y=0)
-ZBED    = -PLATE_GAP - PLATE_THICKNESS;
+ZBED    = -GAP - PLATE_THICKNESS;
 
 BOT_BOSS_R = M3_INSERT_D/2 + SCREW_BOSS_WALL;
 
@@ -372,6 +371,19 @@ function tilt_z(x, y, a) =
         p3 = _rot_z(p2, TILT_PHI))
     ZBED + p3[2];
 
+// XY of a point on the left half after the yaw + tilt used by half_transform.
+function _half_xy(p, z = 0) =
+    let(p0 = [p[0] - TILT_A[0], p[1] - TILT_A[1], z - TILT_A[2]],
+        p1 = _rot_z(p0, -TILT_PHI),
+        p2 = _rot_x(p1, HALF_TILT),
+        p3 = _rot_z(p2, TILT_PHI),
+        xt = p3[0] + TILT_A[0],
+        yt = p3[1] + TILT_A[1],
+        dx = xt - BOARD_W/2,
+        dy = yt - BOARD_H/2)
+    [BOARD_W/2 + dx*cos(HALF_ROT) - dy*sin(HALF_ROT),
+     BOARD_H/2 + dx*sin(HALF_ROT) + dy*cos(HALF_ROT)];
+
 // Lift the tilted half so its lowest point (outline or screw boss) sits on the
 // bed; the wedge below then fills the gap.
 TILT_SLOPE = abs(sin(HALF_TILT));
@@ -382,8 +394,9 @@ TILT_MIN_Z = min(
 );
 TILT_LIFT = max(0, ZBED - TILT_MIN_Z);
 
-// Touchpad base placement: same bed plane as the printed boards, centred in
-// the split. The right half is pushed out by the base width when enabled.
+// Touchpad base placement: raised above the bottom plane and moved up in Y
+// until it clears the thumb keycaps, so the halves squeeze to the smallest X.
+// GAP=0 puts all parts together; GAP>0 separates them for printing.
 // Profile2 is extruded along raw X over the inner depth only.
 TP_LEVEL_PTS = concat(
     TP_PROFILE1,
@@ -398,12 +411,150 @@ TP_Z0        = min([for (p = TP_LEVEL_PTS) _tp_ly(p)]);
 TP_CX        = TP_LONG2/2;
 TP_CY        = (TP_YMIN + TP_YMAX)/2;
 TP_CY_ACT    = TP_TALL_WALL == "front" ? -TP_CY : TP_CY;
-TP_CENTER_X  = BOARD_W + SPLIT_GAP + TP_OUTER_W/2;
-RIGHT_OFFSET = 2*BOARD_W + SPLIT_GAP + (TOUCHPAD ? SPLIT_GAP + TP_OUTER_W : 0);
+
+// Keep the touchpad bottom aligned with the keyboard bottom, and drop it 20 mm
+// in Y so it nearly touches the keyboard at the front.
+TP_LIFT   = 0;
+TP_Y_DROP = 20;
+
+// Choc v1 keycap envelope (18 x 17 keycaps).
+KEYCAP_R   = sqrt(9*9 + 8.5*8.5);
+TP_FRONT_Y = max([
+    for (s = switches)
+        if (s[0] > 100 && s[1] < 50) _half_xy(s)[1]
+]) + KEYCAP_R + 2 - TP_Y_DROP;
+
+// Inner-most point of the left half above the thumb clusters. The touchpad
+// side is tightened to the printed outline there, minimising X.
+function _tp_inner_best(i = 0, bx = -1e9, by = 0) =
+    i >= len(outer) ? [bx, by] :
+    let(q = _half_xy(outer[i]))
+        (q[1] >= TP_FRONT_Y && q[0] > bx)
+            ? _tp_inner_best(i + 1, q[0], q[1])
+            : _tp_inner_best(i + 1, bx, by);
+TP_INNER    = _tp_inner_best();
+TP_LEFT_X0  = TP_INNER[0] + PCB_CLEARANCE;   // over the outline, never the PCB
+TP_BOSS_Y   = TP_INNER[1];
+TP_LEFT_X   = TP_LEFT_X0 + GAP;
+TP_RIGHT_X0 = TP_LEFT_X0 + TP_OUTER_W;
+TP_RIGHT_X  = TP_LEFT_X + TP_OUTER_W;
+TP_CENTER_X = TP_LEFT_X + TP_OUTER_W/2;
+TP_Y_POS    = TP_TALL_WALL == "front" ? TP_FRONT_Y + TP_YMAX : TP_FRONT_Y - TP_YMIN;
+RIGHT_OFFSET = TOUCHPAD ? 2*TP_LEFT_X + TP_OUTER_W : 2*BOARD_W + GAP;
+
+// Joinery: the keyboard halves have bottom lips that slide into pockets cut
+// into the touchpad base from below. The screws go up from under the lips into
+// blind heat-set inserts in the touchpad base, so all bottoms stay flush.
+TP_HALF_PTS = concat(
+    [for (p = outer) _half_xy(p)],
+    [_half_xy(outer[0])]
+);
+function _edge_x(p1, p2, y) =
+    ((p1[1] <= y && y < p2[1]) || (p2[1] <= y && y < p1[1]))
+        ? p1[0] + (y - p1[1])/(p2[1] - p1[1])*(p2[0] - p1[0])
+        : -1e9;
+function _maxx_at(pts, y, i = 0, m = -1e9) =
+    i >= len(pts) - 1 ? m
+    : _maxx_at(pts, y, i + 1, max(m, _edge_x(pts[i], pts[i+1], y)));
+
+TP_MOUNT_Y    = [57, TP_BOSS_Y];
+TP_INSET      = 5;
+TP_LIP_W      = 12;
+TP_LIP_T      = 5;
+TP_LIP_MARGIN = 6;
+TP_LIP_EMBED  = 2;   // lower lip part embedded in the bottom plate
+TP_POCKET_C   = 0.3;
+TP_SCREW_X_L  = TP_LEFT_X0 + TP_INSET;   // lip screw at GAP=0
+TP_SCREW_X_R  = TP_RIGHT_X0 - TP_INSET;
+TP_INS_X_L    = TP_LEFT_X + TP_INSET;    // insert (moves with GAP)
+TP_INS_X_R    = TP_RIGHT_X - TP_INSET;
+TP_LIP_L      = TP_INSET + TP_LIP_MARGIN;        // lip inside the touchpad
+TP_POCKET_Z   = ZBED + TP_LIP_T + TP_POCKET_C;   // pocket ceiling / insert start
+
+module touchpad_mount_cutouts() {
+    // pockets for the keyboard lips, open to the side and bottom
+    for (y = TP_MOUNT_Y) {
+        translate([TP_LEFT_X - 0.5,
+                   y - (TP_LIP_W + 2*TP_POCKET_C)/2, ZBED - 0.1])
+            cube([TP_LIP_L + TP_POCKET_C + 0.5,
+                  TP_LIP_W + 2*TP_POCKET_C,
+                  TP_LIP_T + TP_POCKET_C + 0.1]);
+        translate([TP_RIGHT_X - TP_LIP_L - TP_POCKET_C,
+                   y - (TP_LIP_W + 2*TP_POCKET_C)/2, ZBED - 0.1])
+            cube([TP_LIP_L + TP_POCKET_C + 0.5,
+                  TP_LIP_W + 2*TP_POCKET_C,
+                  TP_LIP_T + TP_POCKET_C + 0.1]);
+    }
+    // blind inserts above each lip pocket
+    for (y = TP_MOUNT_Y) {
+        translate([TP_INS_X_L, y, TP_POCKET_Z])
+            cylinder(d = M3_INSERT_D, h = M3_INSERT_H + 0.1, $fn = 48);
+        translate([TP_INS_X_R, y, TP_POCKET_Z])
+            cylinder(d = M3_INSERT_D, h = M3_INSERT_H + 0.1, $fn = 48);
+    }
+}
+
+module tp_lips_world() {
+    difference() {
+        union() {
+            for (y = TP_MOUNT_Y) {
+                xstart = _maxx_at(TP_HALF_PTS, y);   // board edge
+                // lower part embedded in the bottom plate for a strong joint
+                translate([xstart - TP_LIP_EMBED, y - TP_LIP_W/2, ZBED])
+                    cube([TP_SCREW_X_L + TP_LIP_MARGIN
+                          - (xstart - TP_LIP_EMBED),
+                          TP_LIP_W, PLATE_THICKNESS]);
+                // upper part above the bottom plate, clear of the PCB
+                translate([xstart, y - TP_LIP_W/2, ZBED + PLATE_THICKNESS])
+                    cube([TP_SCREW_X_L + TP_LIP_MARGIN - xstart,
+                          TP_LIP_W, TP_LIP_T - PLATE_THICKNESS]);
+            }
+        }
+        for (y = TP_MOUNT_Y) {
+            translate([TP_SCREW_X_L, y, ZBED - 1])
+                cylinder(d = M3_CLEAR_D, h = TP_LIP_T + 2, $fn = 32);
+            translate([TP_SCREW_X_L, y, ZBED - 0.1])
+                cylinder(d = M3_CLEAR_D + 2.5, h = 1.6, $fn = 32);
+        }
+    }
+}
+
+// Finger scoops for lifting the touchpad out: one near the front edge and one
+// near the back edge, centred across the width.
+TP_FINGER_R     = 8;
+TP_FINGER_EDGE  = 4;
+TP_FINGER_X     = TP_CENTER_X;
+TP_FINGER_Y0    = TP_FRONT_Y + TP_FINGER_EDGE;
+TP_FINGER_Y1    = TP_Y_POS + TP_YMAX - TP_FINGER_EDGE;
+TP_FINGER_Z0    = ZBED + TP_LIFT - TP_Z0
+                  + (TP_FINGER_Y0 - TP_Y_POS)*tan(TP_LEVEL);
+TP_FINGER_Z1    = ZBED + TP_LIFT - TP_Z0
+                  + (TP_FINGER_Y1 - TP_Y_POS)*tan(TP_LEVEL);
+
+module touchpad_finger_cutouts() {
+    translate([TP_FINGER_X, TP_FINGER_Y0, TP_FINGER_Z0])
+        sphere(r = TP_FINGER_R, $fn = 64);
+    translate([TP_FINGER_X, TP_FINGER_Y1, TP_FINGER_Z1])
+        sphere(r = TP_FINGER_R, $fn = 64);
+}
 
 module touchpad_placed() {
-    translate([TP_CENTER_X - TP_CX, BOARD_H/2 - TP_CY_ACT, ZBED - TP_Z0])
-        touchpad_base();
+    difference() {
+        translate([TP_CENTER_X - TP_CX, TP_Y_POS, ZBED + TP_LIFT - TP_Z0])
+            touchpad_base();
+        touchpad_mount_cutouts();
+        touchpad_finger_cutouts();
+    }
+}
+
+// Plan footprint of one touchpad at GAP=0. The keyboard outline is cut away
+// where the touchpad overlaps it, but the PCB "outer" polygon is never crossed.
+module touchpad_footprint_world() {
+    translate([0, 0, -1000])
+        linear_extrude(height = 2000)
+            translate([TP_LEFT_X0, TP_FRONT_Y])
+                square([TP_RIGHT_X0 - TP_LEFT_X0,
+                        (TP_Y_POS + TP_YMAX) - TP_FRONT_Y]);
 }
 
 // --- Tilted bottom wedge ----------------------------------------------------
@@ -480,20 +631,34 @@ module selected_parts() {
     if (PART == "bottom" || PART == "all") bottom_part_with_wedge(HALF_ROT);
 }
 
+module half_placed() {
+    union() {
+        // Cut the outline/bosses away where the touchpad overlaps them.
+        difference() {
+            half_transform(HALF_ROT) selected_parts();
+            if (TOUCHPAD) touchpad_footprint_world();
+        }
+        // Lips are re-added after the cut so they still enter the touchpad.
+        if (TOUCHPAD && (PART == "bottom" || PART == "all"))
+            tp_lips_world();
+    }
+}
+
 module left_half_placed() {
-    half_transform(HALF_ROT) selected_parts();
+    half_placed();
 }
 
 module right_half_placed() {
     translate([RIGHT_OFFSET, 0, 0]) mirror([1,0,0])
-        half_transform(HALF_ROT) selected_parts();
+        half_placed();
 }
 
 // Lift single printable parts so their lowest point sits on z=0.
 // The top part is offset from the bottom plane by -ZBED, and the tilt lowers
 // its lowest edge by that distance times (1 - cos(HALF_TILT)).
 BED_LIFT =
-    (PART == "bottom" || PART == "touchpad") ? -ZBED :
+    (PART == "bottom") ? -ZBED :
+    (PART == "touchpad") ? -(ZBED + TP_LIFT) :
     (PART == "top") ? -ZBED*(1 - cos(HALF_TILT)) : 0;
 
 module selected() {
