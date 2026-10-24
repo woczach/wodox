@@ -496,19 +496,22 @@ module touchpad_mount_cutouts() {
 }
 
 module tp_lips_world() {
+    eps = 0.01;   // avoid coplanar/touching surfaces in the union
     difference() {
         union() {
             for (y = TP_MOUNT_Y) {
                 xstart = _maxx_at(TP_HALF_PTS, y);   // board edge
                 // lower part embedded in the bottom plate for a strong joint
-                translate([xstart - TP_LIP_EMBED, y - TP_LIP_W/2, ZBED])
+                translate([xstart - TP_LIP_EMBED - eps,
+                           y - TP_LIP_W/2, ZBED + eps])
                     cube([TP_SCREW_X_L + TP_LIP_MARGIN
-                          - (xstart - TP_LIP_EMBED),
-                          TP_LIP_W, PLATE_THICKNESS]);
+                          - (xstart - TP_LIP_EMBED - eps),
+                          TP_LIP_W, PLATE_THICKNESS + 0.1]);
                 // upper part above the bottom plate, clear of the PCB
-                translate([xstart, y - TP_LIP_W/2, ZBED + PLATE_THICKNESS])
-                    cube([TP_SCREW_X_L + TP_LIP_MARGIN - xstart,
-                          TP_LIP_W, TP_LIP_T - PLATE_THICKNESS]);
+                translate([xstart + eps, y - TP_LIP_W/2,
+                           ZBED + PLATE_THICKNESS - 0.1])
+                    cube([TP_SCREW_X_L + TP_LIP_MARGIN - xstart - eps,
+                          TP_LIP_W, TP_LIP_T - PLATE_THICKNESS + 0.1]);
             }
         }
         for (y = TP_MOUNT_Y) {
@@ -578,12 +581,7 @@ module pcb_footprint_world() {
 // Solid wedge under the bottom part: flat on the bed, tilted on top to match
 // the rotated bottom part.
 module bottom_footprint_2d() {
-    union() {
-        offset(delta = OUTLINE) board_2d();
-        for (s = screws)
-            translate([s[0], s[1]])
-                circle(d = M3_INSERT_D + 2*SCREW_BOSS_WALL);
-    }
+    offset(delta = OUTLINE) board_2d();
 }
 
 module tilt_axis_rotate(a) {
